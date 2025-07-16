@@ -17,7 +17,7 @@ import java.sql.ResultSet;
 public class EditProfile extends javax.swing.JFrame {
     private String loggedInUsername;
     private String loggedInRole;
-
+    private PayrollService service;
     /**
      * Creates new form EditProfile
      */
@@ -25,52 +25,38 @@ public class EditProfile extends javax.swing.JFrame {
         initComponents();
     }
     
-    public EditProfile(String loggedInUsername, String loggedInRole) {
+//    public EditProfile(String loggedInUsername, String loggedInRole) {
+//        initComponents();
+//        this.loggedInUsername = loggedInUsername;
+//        this.loggedInRole = loggedInRole;
+//        loadProfile();
+//    }
+
+    public EditProfile(String loggedInUsername, String loggedInRole, PayrollService service) {
         initComponents();
         this.loggedInUsername = loggedInUsername;
         this.loggedInRole = loggedInRole;
+        this.service = service;
         loadProfile();
     }
-
     
     private void loadProfile() {
-    try {
-        Connection conn = DriverManager.getConnection(
-            "jdbc:derby://localhost:1527/PayrollAssignment",
-            "group18",
-            "group18"
-        );
-
-        // Load password
-        PreparedStatement ps1 = conn.prepareStatement(
-            "SELECT PASSWORD FROM USERS WHERE USERNAME = ?"
-        );
-        ps1.setString(1, loggedInUsername);
-        ResultSet rs1 = ps1.executeQuery();
-        if (rs1.next()) {
-            PasswordTxt.setText(rs1.getString("PASSWORD"));
-            UsernameTxt.setText(loggedInUsername);
-            UsernameTxt.setEditable(false); // prevent changing username
+        try {
+            String[] data = service.getUserProfile(loggedInUsername);
+            if (data[0] != null) {
+                PasswordTxt.setText(data[0]);
+                UsernameTxt.setText(loggedInUsername);
+                UsernameTxt.setEditable(false);
+            }
+            FirstNameTxt.setText(data[1]);
+            LastNameTxt.setText(data[2]);
+            ICPasswordTxt.setText(data[3]);
+        } catch (Exception e) {
+            e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Error loading profile: " + e.getMessage());
         }
-
-        // Load personal info
-        PreparedStatement ps2 = conn.prepareStatement(
-            "SELECT FIRSTNAME, LASTNAME, ICPASSPORT FROM USERINFO WHERE USERNAME = ?"
-        );
-        ps2.setString(1, loggedInUsername);
-        ResultSet rs2 = ps2.executeQuery();
-        if (rs2.next()) {
-            FirstNameTxt.setText(rs2.getString("FIRSTNAME"));
-            LastNameTxt.setText(rs2.getString("LASTNAME"));
-            ICPasswordTxt.setText(rs2.getString("ICPASSPORT"));
-        }
-
-        conn.close();
-    } catch (Exception e) {
-        e.printStackTrace();
-        javax.swing.JOptionPane.showMessageDialog(this, "Error loading profile: " + e.getMessage());
     }
-}
+
 
 
     /**
@@ -210,36 +196,20 @@ public class EditProfile extends javax.swing.JFrame {
 
     private void SaveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveBtnActionPerformed
         // TODO add your handling code here:
-         try {
-            Connection conn = DriverManager.getConnection(
-                "jdbc:derby://localhost:1527/PayrollAssignment",
-                "group18",
-                "group18"
+        try {
+            boolean updated = service.updateUserProfile(
+                loggedInUsername,
+                PasswordTxt.getText(),
+                FirstNameTxt.getText(),
+                LastNameTxt.getText(),
+                ICPasswordTxt.getText()
             );
-
-            // Update password
-            PreparedStatement ps1 = conn.prepareStatement(
-                "UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?"
-            );
-            ps1.setString(1, PasswordTxt.getText());
-            ps1.setString(2, loggedInUsername);
-            ps1.executeUpdate();
-
-            // Update personal info
-            PreparedStatement ps2 = conn.prepareStatement(
-                "UPDATE USERINFO SET FIRSTNAME = ?, LASTNAME = ?, ICPASSPORT = ? WHERE USERNAME = ?"
-            );
-            ps2.setString(1, FirstNameTxt.getText());
-            ps2.setString(2, LastNameTxt.getText());
-            ps2.setString(3, ICPasswordTxt.getText());
-            ps2.setString(4, loggedInUsername);
-            ps2.executeUpdate();
-
-            conn.close();
-
-            javax.swing.JOptionPane.showMessageDialog(this, "Profile updated successfully!");
-            loadProfile(); // reload updated data
-            // Optionally, reopen the dashboard here
+            if (updated) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Profile updated successfully!");
+                loadProfile();
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Update failed.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             javax.swing.JOptionPane.showMessageDialog(this, "Error updating profile: " + e.getMessage());
@@ -251,11 +221,11 @@ public class EditProfile extends javax.swing.JFrame {
         System.out.println("what is the" + loggedInRole);
         if (loggedInRole.equals("Employee")) {
             System.out.println("HomePage" + loggedInRole);
-            new EmployeeDashboard(loggedInUsername,loggedInRole).setVisible(true);
+            new EmployeeDashboard(loggedInUsername,service,loggedInRole).setVisible(true);
         } else if (loggedInRole.equals("HR")) {
-            new HRDashboard(loggedInUsername,loggedInRole).setVisible(true);
+            new HRDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
         } else if (loggedInRole.equals("Admin")) {
-            new AdminDashboard(loggedInUsername,loggedInRole).setVisible(true);
+            new AdminDashboard(loggedInUsername,service,loggedInRole).setVisible(true);
         }
         this.dispose();
     }//GEN-LAST:event_BackBtnActionPerformed

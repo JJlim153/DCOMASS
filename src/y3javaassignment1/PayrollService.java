@@ -27,17 +27,13 @@ public interface PayrollService extends Remote {
     // Login
     LoginResult loginUser(String username, String password) throws RemoteException;
 
-
-    // Update personal details
-    boolean updatePersonalDetails(
-        String username,
-        String firstName,
-        String lastName,
-        String icPassport
-    ) throws RemoteException;
-    
     List<String[]> getAllUsers() throws RemoteException;
     
     boolean updateUserStatus(String username, String status) throws RemoteException;
+    
+    String[] getUserProfile(String username) throws RemoteException;
+    
+    boolean updateUserProfile(String username, String password, String firstName, String lastName, String icPassport) throws RemoteException;
+
 }
 

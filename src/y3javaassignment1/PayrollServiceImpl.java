@@ -113,72 +113,6 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
     }
 
 
-
-//public String loginUser(String username, String password) throws RemoteException {
-//    try {
-//        PreparedStatement ps = conn.prepareStatement(
-//            "SELECT USERNAME, ROLE, STATUS FROM USERS WHERE USERNAME = ? AND PASSWORD = ?"
-//        );
-//
-//
-//        ps.setString(1, username);
-//        ps.setString(2, password);
-//        ResultSet rs = ps.executeQuery();
-//        if (rs.next()) {
-//            String status = rs.getString("STATUS").trim();
-//            String role = rs.getString("ROLE").trim();
-//            String uname = rs.getString("USERNAME").trim();
-//            System.out.println("DEBUG: Username=[" + uname + "] Status=[" + status + "] Role=[" + role + "]");
-//            if (status.equalsIgnoreCase("Approved")) {
-//                return "Approved:" + rs.getString("ROLE").trim();
-//            } else if (status.equalsIgnoreCase("Pending")) {
-//                return "Pending";
-//            } else if (status.equalsIgnoreCase("Rejected")) {
-//                return "Rejected";
-//            } else {
-//                return "Unknown";
-//            }
-//        } else {
-//            return null;
-//        }
-//    } catch (SQLException e) {
-//        e.printStackTrace();
-//        return null;
-//    }
-//}
-
-
-    public boolean updatePersonalDetails(
-        String username,
-        String firstName,
-        String lastName,
-        String icPassport
-    ) throws RemoteException {
-        try (
-            Connection conn = DriverManager.getConnection(
-                "jdbc:derby://localhost:1527/PayrollAssignment",
-                "group18",
-                "group18"
-            )
-        ) {
-            conn.setAutoCommit(true);
-
-            PreparedStatement ps = conn.prepareStatement(
-                "UPDATE USERINFO SET FIRSTNAME = ?, LASTNAME = ?, ICPASSPORT = ? WHERE USERNAME = ?"
-            );
-            ps.setString(1, firstName);
-            ps.setString(2, lastName);
-            ps.setString(3, icPassport);
-            ps.setString(4, username);
-
-            int updated = ps.executeUpdate();
-            return updated > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     
     public List<String[]> getAllUsers() throws RemoteException {
         List<String[]> users = new ArrayList<>();
@@ -229,6 +163,61 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RemoteException("Error updating user status: " + e.getMessage());
+        }
+    }
+
+
+    public String[] getUserProfile(String username) throws RemoteException {
+        try (
+            Connection conn = DriverManager.getConnection("jdbc:derby://localhost:1527/PayrollAssignment", "group18", "group18")
+        ) {
+            String[] data = new String[4];
+            // Load password
+            PreparedStatement ps1 = conn.prepareStatement("SELECT PASSWORD FROM USERS WHERE USERNAME = ?");
+            ps1.setString(1, username);
+            ResultSet rs1 = ps1.executeQuery();
+            if (rs1.next()) {
+                data[0] = rs1.getString("PASSWORD");
+            }
+            // Load personal info
+            PreparedStatement ps2 = conn.prepareStatement("SELECT FIRSTNAME, LASTNAME, ICPASSPORT FROM USERINFO WHERE USERNAME = ?");
+            ps2.setString(1, username);
+            ResultSet rs2 = ps2.executeQuery();
+            if (rs2.next()) {
+                data[1] = rs2.getString("FIRSTNAME");
+                data[2] = rs2.getString("LASTNAME");
+                data[3] = rs2.getString("ICPASSPORT");
+            }
+            return data;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RemoteException("Error loading profile: " + e.getMessage());
+        }
+    }
+
+
+    public boolean updateUserProfile(String username, String password, String firstName, String lastName, String icPassport) throws RemoteException {
+        try (
+            Connection conn = DriverManager.getConnection("jdbc:derby://localhost:1527/PayrollAssignment", "group18", "group18")
+        ) {
+            conn.setAutoCommit(false);
+            // Update password
+            PreparedStatement ps1 = conn.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?");
+            ps1.setString(1, password);
+            ps1.setString(2, username);
+            ps1.executeUpdate();
+            // Update personal info
+            PreparedStatement ps2 = conn.prepareStatement("UPDATE USERINFO SET FIRSTNAME = ?, LASTNAME = ?, ICPASSPORT = ? WHERE USERNAME = ?");
+            ps2.setString(1, firstName);
+            ps2.setString(2, lastName);
+            ps2.setString(3, icPassport);
+            ps2.setString(4, username);
+            ps2.executeUpdate();
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RemoteException("Error updating profile: " + e.getMessage());
         }
     }
 

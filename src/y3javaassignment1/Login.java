@@ -166,11 +166,11 @@ public class Login extends javax.swing.JFrame {
                     } else if (status.equalsIgnoreCase("Approved")) {
                         JOptionPane.showMessageDialog(this, "Login successful! Role: " + role);
                         if (role.equalsIgnoreCase("Employee")) {
-                            new EmployeeDashboard(username, role).setVisible(true);
+                            new EmployeeDashboard(username, service, role).setVisible(true);
                         } else if (role.equalsIgnoreCase("HR")) {
                             new HRDashboard(username, service, role).setVisible(true);
                         } else if (role.equalsIgnoreCase("Admin")) {
-                            new AdminDashboard(username, role).setVisible(true);
+                            new AdminDashboard(username, service, role).setVisible(true);
                         }
                         this.dispose();
                     } else {

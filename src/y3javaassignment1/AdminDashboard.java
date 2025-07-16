@@ -12,16 +12,18 @@ package y3javaassignment1;
 public class AdminDashboard extends javax.swing.JFrame {
 
     private String loggedInUsername;
+    private PayrollService service;
     private String loggedInRole;
     /**
      * Creates new form AdminDashboard
      */
-    public AdminDashboard() {
-        initComponents();
-    }
+//    public AdminDashboard() {
+//        initComponents();
+//    }
     
-    public AdminDashboard(String username, String role) {
+    public AdminDashboard(String username, PayrollService service, String role) {
         initComponents();
+        this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
         System.out.println("Hi" + username);
@@ -93,9 +95,9 @@ public class AdminDashboard extends javax.swing.JFrame {
 
     private void EditProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditProfileBtnActionPerformed
         // TODO add your handling code here:
-        EditProfile editProfileForm = new EditProfile(loggedInUsername, loggedInRole); 
-        editProfileForm.setLocationRelativeTo(null);
-        editProfileForm.setVisible(true);
+        EditProfile profileForm = new EditProfile(loggedInUsername, loggedInRole, service);
+        profileForm.setLocationRelativeTo(null);
+        profileForm.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_EditProfileBtnActionPerformed
 
@@ -137,7 +139,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new AdminDashboard().setVisible(true);
+//                new AdminDashboard().setVisible(true);
             }
         });
     }

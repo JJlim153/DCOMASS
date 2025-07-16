@@ -18,15 +18,15 @@ public class HRDashboard extends javax.swing.JFrame {
     /**
      * Creates new form HRDashboard
      */
-    public HRDashboard() {
-        initComponents();
-    }
+//    public HRDashboard() {
+//        initComponents();
+//    }
     
-    public HRDashboard(String username, String role) {
-        initComponents();
-        this.loggedInUsername = username;
-        this.loggedInRole = role;
-    }
+//    public HRDashboard(String username, String role) {
+//        initComponents();
+//        this.loggedInUsername = username;
+//        this.loggedInRole = role;
+//    }
 
     
     public HRDashboard(String username, PayrollService service, String role) {
@@ -128,7 +128,7 @@ public class HRDashboard extends javax.swing.JFrame {
 
     private void EditProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditProfileBtnActionPerformed
         // TODO add your handling code here:
-        EditProfile profileForm = new EditProfile(loggedInUsername, loggedInRole);
+        EditProfile profileForm = new EditProfile(loggedInUsername, loggedInRole, service);
         profileForm.setLocationRelativeTo(null);
         profileForm.setVisible(true);
         this.dispose();
@@ -164,7 +164,7 @@ public class HRDashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new HRDashboard().setVisible(true);
+//                new HRDashboard().setVisible(true);
             }
         });
     }

@@ -191,7 +191,7 @@ public class UserStatus extends javax.swing.JFrame {
 
     private void BackBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BackBtnActionPerformed
         // TODO add your handling code here:
-        HRDashboard hrDashboardForm = new HRDashboard();
+        HRDashboard hrDashboardForm = new HRDashboard(loggedInUsername, service, "HR");
         hrDashboardForm.setLocationRelativeTo(null);
         hrDashboardForm.setVisible(true);
         this.dispose();

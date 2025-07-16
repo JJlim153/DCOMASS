@@ -13,15 +13,17 @@ package y3javaassignment1;
 public class EmployeeDashboard extends javax.swing.JFrame {
 
     private String loggedInUsername;
+    private PayrollService service;
     private String loggedInRole;
 
     /** Creates new form EmployeeDashboard */
-    public EmployeeDashboard() {
-        initComponents();
-    }
+//    public EmployeeDashboard() {
+//        initComponents();
+//    }
     
-    public EmployeeDashboard(String username, String role) {
+    public EmployeeDashboard(String username, PayrollService service, String role) {
         initComponents();
+        this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
         System.out.println("Hi" + username);
@@ -95,9 +97,9 @@ public class EmployeeDashboard extends javax.swing.JFrame {
 
     private void ProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProfileBtnActionPerformed
         // TODO add your handling code here:
-        EditProfile editProfileForm = new EditProfile(loggedInUsername, loggedInRole); 
-        editProfileForm.setLocationRelativeTo(null);
-        editProfileForm.setVisible(true);
+        EditProfile profileForm = new EditProfile(loggedInUsername, loggedInRole, service);
+        profileForm.setLocationRelativeTo(null);
+        profileForm.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_ProfileBtnActionPerformed
 
@@ -139,7 +141,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new EmployeeDashboard().setVisible(true);
+//                new EmployeeDashboard().setVisible(true);
             }
         });
     }
