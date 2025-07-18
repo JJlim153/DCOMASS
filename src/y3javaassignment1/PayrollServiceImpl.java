@@ -293,6 +293,66 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         }
     }
     
+    @Override
+    public List<String> getApprovedUsernames() throws RemoteException {
+        List<String> usernames = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT USERNAME FROM USERS WHERE STATUS = 'Approved'");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                usernames.add(rs.getString("USERNAME"));
+            }
+        } catch (SQLException e) {
+            throw new RemoteException("Error fetching usernames: " + e.getMessage());
+        }
+        return usernames;
+    }
+
+    @Override
+    public PayrollSummary getLatestPayrollForUser(String username) throws RemoteException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                "SELECT BASE_SALARY, BONUS, EPF, SOCSO FROM PAYROLL WHERE USERNAME = ? ORDER BY PAY_DATE DESC FETCH FIRST ROW ONLY"
+            );
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new PayrollSummary(
+                    username,
+                    rs.getDouble("BASE_SALARY"),
+                    rs.getDouble("BONUS"),
+                    rs.getDouble("EPF"),
+                    rs.getDouble("SOCSO")
+                );
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RemoteException("Error fetching payroll: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus, double epf, double socso) throws RemoteException {
+        try (Connection conn = getConnection()) {
+            double annual = base + bonus - epf - socso;
+
+            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, ANUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setDate(2, payDate);
+            ps.setDouble(3, base);
+            ps.setDouble(4, bonus);
+            ps.setDouble(5, epf);
+            ps.setDouble(6, socso);
+            ps.setDouble(7, annual);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RemoteException("Error inserting payslip: " + e.getMessage());
+        }
+    }
 
 }
 
