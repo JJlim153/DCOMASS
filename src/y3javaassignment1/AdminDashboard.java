@@ -123,8 +123,8 @@ public class AdminDashboard extends javax.swing.JFrame {
 
     private void GeneratePayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GeneratePayslipBtnActionPerformed
         // TODO add your handling code here:
-        new GeneratePayslip(loggedInUsername, loggedInRole, service).setVisible(true);
-        this.dispose();
+//        new GeneratePayslip(loggedInUsername, loggedInRole, service).setVisible(true);
+//        this.dispose();
     }//GEN-LAST:event_GeneratePayslipBtnActionPerformed
 
     /**

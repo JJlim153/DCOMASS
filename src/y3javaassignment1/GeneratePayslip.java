@@ -129,7 +129,7 @@ public class GeneratePayslip extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose(); // close current GeneratePayslip window
-                new AdminDashboard(loggedInUsername,service,loggedInRole).setVisible(true); // open AdminDashboard
+                new HRDashboard(loggedInUsername,service,loggedInRole).setVisible(true); // open HRDashboard
             }
         });
 
