@@ -5,6 +5,9 @@
  */
 package y3javaassignment1;
 
+import java.rmi.RemoteException;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Daniellim
@@ -49,6 +52,8 @@ public class HRDashboard extends javax.swing.JFrame {
         UserStatusBtn = new javax.swing.JButton();
         LogoutBtn = new javax.swing.JButton();
         EditProfileBtn = new javax.swing.JButton();
+        PayrollReportBtn = new javax.swing.JButton();
+        PayslipBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -76,6 +81,20 @@ public class HRDashboard extends javax.swing.JFrame {
             }
         });
 
+        PayrollReportBtn.setText("Payroll Report");
+        PayrollReportBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PayrollReportBtnActionPerformed(evt);
+            }
+        });
+
+        PayslipBtn.setText("Generate Payslip");
+        PayslipBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PayslipBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -86,10 +105,14 @@ public class HRDashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
                 .addComponent(LogoutBtn))
             .addGroup(layout.createSequentialGroup()
-                .addGap(29, 29, 29)
-                .addComponent(UserStatusBtn)
+                .addGap(88, 88, 88)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(PayrollReportBtn)
+                    .addComponent(UserStatusBtn))
                 .addGap(18, 18, 18)
-                .addComponent(EditProfileBtn)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(EditProfileBtn)
+                    .addComponent(PayslipBtn))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -104,7 +127,11 @@ public class HRDashboard extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(UserStatusBtn)
                     .addComponent(EditProfileBtn))
-                .addContainerGap(132, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 78, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PayrollReportBtn)
+                    .addComponent(PayslipBtn))
+                .addGap(31, 31, 31))
         );
 
         pack();
@@ -133,6 +160,33 @@ public class HRDashboard extends javax.swing.JFrame {
         profileForm.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_EditProfileBtnActionPerformed
+
+    private void PayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PayslipBtnActionPerformed
+                                          
+        try {
+            String targetUsername = JOptionPane.showInputDialog(this, "Enter the employee's username:");
+            if (targetUsername == null || targetUsername.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No username entered.");
+                return;
+            }
+
+            PayrollSummary ps = service.getPayslip(targetUsername.trim());
+
+            if (ps != null) {
+                new PayslipFrame(ps);
+            } else {
+                JOptionPane.showMessageDialog(this, "No payslip found for: " + targetUsername);
+            }
+
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Could not load payslip: " + e.getMessage());
+        }
+    }//GEN-LAST:event_PayslipBtnActionPerformed
+
+    private void PayrollReportBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PayrollReportBtnActionPerformed
+        PayrollReportTable tableWindow = new PayrollReportTable(service);
+        tableWindow.setVisible(true);
+    }//GEN-LAST:event_PayrollReportBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -172,7 +226,10 @@ public class HRDashboard extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton EditProfileBtn;
     private javax.swing.JButton LogoutBtn;
+    private javax.swing.JButton PayrollReportBtn;
+    private javax.swing.JButton PayslipBtn;
     private javax.swing.JButton UserStatusBtn;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
+

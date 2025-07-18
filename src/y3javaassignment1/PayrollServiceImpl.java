@@ -19,14 +19,27 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
 
 
     public PayrollServiceImpl() throws RemoteException {
+
         try {
-            // Load Derby driver
             Class.forName("org.apache.derby.jdbc.ClientDriver");
-            // Connect to your database
+            Connection conn = DriverManager.getConnection(
+                "jdbc:derby://localhost:1527/PayrollAssignment", "group18", "group18"
+            );
+
+            System.out.println("Connected to DB successfully.");
+
+            // Optional test query
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM payroll");
+            while (rs.next()) {
+                System.out.println("Found payroll: " + rs.getString("username"));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
 
     public boolean registerUser(
         String username,
@@ -220,8 +233,66 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
             throw new RemoteException("Error updating profile: " + e.getMessage());
         }
     }
+    
+    
+         
+    
+    
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+            "jdbc:derby://localhost:1527/PayrollAssignment",
+            "group18",
+            "group18"
+        );
+    }
 
+    @Override
+    public List<PayrollSummary> generatePayrollReport() throws RemoteException {
+        List<PayrollSummary> list = new ArrayList<>();
 
+        try (Connection conn = getConnection()) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM payroll");
+
+            while (rs.next()) {
+                String username = rs.getString("username");
+                double base = rs.getDouble("base_salary");
+                double bonus = rs.getDouble("bonus");
+                double epf = rs.getDouble("epf");
+                double tax = rs.getDouble("tax");
+
+                list.add(new PayrollSummary(username, base, bonus, epf, tax));
+            }
+
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RemoteException("Database error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public PayrollSummary getPayslip(String username) throws RemoteException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM payroll WHERE username = ?");
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                double base = rs.getDouble("base_salary");
+                double bonus = rs.getDouble("bonus");
+                double epf = rs.getDouble("epf");
+                double tax = rs.getDouble("tax");
+                return new PayrollSummary(username, base, bonus, epf, tax);
+            } else {
+                throw new RemoteException("No payroll record found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RemoteException("Database error: " + e.getMessage());
+        }
+    }
+    
 
 }
 
