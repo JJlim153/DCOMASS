@@ -54,6 +54,7 @@ public class HRDashboard extends javax.swing.JFrame {
         EditProfileBtn = new javax.swing.JButton();
         PayrollReportBtn = new javax.swing.JButton();
         PayslipBtn = new javax.swing.JButton();
+        GeneratePayslipBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -95,6 +96,13 @@ public class HRDashboard extends javax.swing.JFrame {
             }
         });
 
+        GeneratePayslipBtn.setText("Generate Payslip");
+        GeneratePayslipBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GeneratePayslipBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -102,18 +110,27 @@ public class HRDashboard extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(97, 97, 97)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 88, Short.MAX_VALUE)
                 .addComponent(LogoutBtn))
             .addGroup(layout.createSequentialGroup()
-                .addGap(88, 88, 88)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(PayrollReportBtn)
-                    .addComponent(UserStatusBtn))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(EditProfileBtn)
-                    .addComponent(PayslipBtn))
-                .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(88, 88, 88)
+                        .addComponent(PayrollReportBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(UserStatusBtn)
+                        .addGap(50, 50, 50)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(PayslipBtn)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(EditProfileBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(GeneratePayslipBtn)
+                        .addGap(19, 19, 19))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -126,7 +143,8 @@ public class HRDashboard extends javax.swing.JFrame {
                 .addGap(101, 101, 101)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(UserStatusBtn)
-                    .addComponent(EditProfileBtn))
+                    .addComponent(EditProfileBtn)
+                    .addComponent(GeneratePayslipBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 78, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(PayrollReportBtn)
@@ -188,6 +206,12 @@ public class HRDashboard extends javax.swing.JFrame {
         tableWindow.setVisible(true);
     }//GEN-LAST:event_PayrollReportBtnActionPerformed
 
+    private void GeneratePayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GeneratePayslipBtnActionPerformed
+        // TODO add your handling code here:
+         new GeneratePayslip(loggedInUsername, loggedInRole, service).setVisible(true);
+         this.dispose();
+    }//GEN-LAST:event_GeneratePayslipBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -225,6 +249,7 @@ public class HRDashboard extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton EditProfileBtn;
+    private javax.swing.JButton GeneratePayslipBtn;
     private javax.swing.JButton LogoutBtn;
     private javax.swing.JButton PayrollReportBtn;
     private javax.swing.JButton PayslipBtn;

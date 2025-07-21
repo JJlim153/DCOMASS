@@ -36,4 +36,9 @@ public interface PayrollService extends Remote {
     // Payroll Functions
     List<PayrollSummary> generatePayrollReport() throws RemoteException;
     PayrollSummary getPayslip(String username) throws RemoteException;
+    
+    List<String> getApprovedUsernames() throws RemoteException;
+    PayrollSummary getLatestPayrollForUser(String username) throws RemoteException;
+    boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus, double epf, double socso) throws RemoteException;
+
 }
