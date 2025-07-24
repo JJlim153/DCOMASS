@@ -18,6 +18,15 @@ To do:
 -automated calculation of gross pay, deductions and net pay(admin)
 
 
+LIBRARY IMPORT
+----------------
+
+Locate 'jdatepicker-1.3.4.jar' to resolve library import
+
+
+
+
+
 DATABASE INFORMATION
 ---------------------
 Database name:PayrollAssignment 

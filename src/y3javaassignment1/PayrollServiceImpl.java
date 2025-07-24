@@ -354,5 +354,31 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         }
     }
 
+    @Override
+public List<PayrollRecord> getPayslipsForUser(String username) throws RemoteException {
+    List<PayrollRecord> list = new ArrayList<>();
+    try (Connection conn = getConnection()) {
+        PreparedStatement ps = conn.prepareStatement(
+            "SELECT * FROM PAYROLL WHERE USERNAME = ? ORDER BY PAY_DATE DESC"
+        );
+        ps.setString(1, username);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            list.add(new PayrollRecord(
+                rs.getDate("PAY_DATE"),
+                rs.getDouble("BASE_SALARY"),
+                rs.getDouble("BONUS"),
+                rs.getDouble("EPF"),
+                rs.getDouble("SOCSO"),
+                rs.getDouble("ANUALINCOME")
+            ));
+        }
+    } catch (SQLException e) {
+        throw new RemoteException("Error loading payslips: " + e.getMessage());
+    }
+    return list;
+}
+
 }
 

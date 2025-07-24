@@ -44,6 +44,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         ProfileBtn = new javax.swing.JButton();
         LogoutBtn = new javax.swing.JButton();
+        ViewPayslipBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -64,6 +65,13 @@ public class EmployeeDashboard extends javax.swing.JFrame {
             }
         });
 
+        ViewPayslipBtn.setText("View Payslip");
+        ViewPayslipBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ViewPayslipBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -77,6 +85,8 @@ public class EmployeeDashboard extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(40, 40, 40)
                 .addComponent(ProfileBtn)
+                .addGap(30, 30, 30)
+                .addComponent(ViewPayslipBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -88,7 +98,9 @@ public class EmployeeDashboard extends javax.swing.JFrame {
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(LogoutBtn))
                 .addGap(101, 101, 101)
-                .addComponent(ProfileBtn)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ProfileBtn)
+                    .addComponent(ViewPayslipBtn))
                 .addContainerGap(127, Short.MAX_VALUE))
         );
 
@@ -110,6 +122,12 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         loginForm.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_LogoutBtnActionPerformed
+
+    private void ViewPayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewPayslipBtnActionPerformed
+        // TODO add your handling code here:
+        new ViewPayslip(loggedInUsername, loggedInRole, service).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_ViewPayslipBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -149,6 +167,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton LogoutBtn;
     private javax.swing.JButton ProfileBtn;
+    private javax.swing.JButton ViewPayslipBtn;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 

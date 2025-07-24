@@ -51,14 +51,14 @@ public class GeneratePayslip extends JFrame {
 
         usernameComboBox = new JComboBox<>();
         gbc.gridx = 1;
-        loadUsernames();
+        add(usernameComboBox, gbc);
         usernameComboBox.addActionListener(new ActionListener() {
         @Override
             public void actionPerformed(ActionEvent e) {
                 loadLatestPayrollData();  // this is your method to prefill fields
             }
         });
-        add(usernameComboBox, gbc);
+        
         
 
         // Date Picker
@@ -105,6 +105,7 @@ public class GeneratePayslip extends JFrame {
         socsoField = new JTextField(10);
         gbc.gridx = 1;
         add(socsoField, gbc);
+        loadUsernames();
 
         // Submit Button
         gbc.gridx = 1;
@@ -141,10 +142,17 @@ private void loadUsernames() {
         for (String name : usernames) {
             usernameComboBox.addItem(name);
         }
+
+        // ✅ Select first item and load its payroll data immediately
+        if (!usernames.isEmpty()) {
+            usernameComboBox.setSelectedIndex(0); // optional, but makes sure first is selected
+            loadLatestPayrollData(); // 💡 trigger data load manually here
+        }
     } catch (RemoteException e) {
         JOptionPane.showMessageDialog(this, "Failed to load usernames: " + e.getMessage());
     }
 }
+
 
 
 private void loadLatestPayrollData() {
@@ -175,6 +183,10 @@ private void insertPayslip() {
     try {
         String username = (String) usernameComboBox.getSelectedItem();
         java.util.Date selectedDate = (java.util.Date) datePicker.getModel().getValue();
+        if (selectedDate == null) {
+            JOptionPane.showMessageDialog(this, "Please select a date.");
+            return;
+        }
         java.sql.Date payDate = new java.sql.Date(selectedDate.getTime());
 
         double base = Double.parseDouble(baseSalaryField.getText());
@@ -182,9 +194,12 @@ private void insertPayslip() {
         double epf = Double.parseDouble(epfField.getText());
         double socso = Double.parseDouble(socsoField.getText());
 
+        double netSalary = base + bonus - epf - socso;
+
         boolean success = service.insertPayslip(username, payDate, base, bonus, epf, socso);
         if (success) {
-            JOptionPane.showMessageDialog(this, "Payslip generated and saved via RMI!");
+            JOptionPane.showMessageDialog(this,
+                String.format("Payslip generated and saved via RMI!\nNet Salary: RM %.2f", netSalary));
         } else {
             JOptionPane.showMessageDialog(this, "Failed to insert payslip.");
         }
@@ -192,6 +207,7 @@ private void insertPayslip() {
         JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
     }
 }
+
 
 
 

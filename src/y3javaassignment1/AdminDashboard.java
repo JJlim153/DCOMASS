@@ -44,6 +44,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         EditProfileBtn = new javax.swing.JButton();
         LogoutBtn = new javax.swing.JButton();
         GeneratePayslipBtn = new javax.swing.JButton();
+        ViewPayslipBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -71,6 +72,13 @@ public class AdminDashboard extends javax.swing.JFrame {
             }
         });
 
+        ViewPayslipBtn.setText("View Payslip");
+        ViewPayslipBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ViewPayslipBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -81,10 +89,15 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGap(26, 26, 26)
                 .addComponent(LogoutBtn))
             .addGroup(layout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(EditProfileBtn)
-                .addGap(72, 72, 72)
-                .addComponent(GeneratePayslipBtn)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addComponent(EditProfileBtn)
+                        .addGap(72, 72, 72)
+                        .addComponent(GeneratePayslipBtn))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(137, 137, 137)
+                        .addComponent(ViewPayslipBtn)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -99,7 +112,9 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(EditProfileBtn)
                     .addComponent(GeneratePayslipBtn))
-                .addContainerGap(134, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(ViewPayslipBtn)
+                .addContainerGap(93, Short.MAX_VALUE))
         );
 
         pack();
@@ -126,6 +141,12 @@ public class AdminDashboard extends javax.swing.JFrame {
 //        new GeneratePayslip(loggedInUsername, loggedInRole, service).setVisible(true);
 //        this.dispose();
     }//GEN-LAST:event_GeneratePayslipBtnActionPerformed
+
+    private void ViewPayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewPayslipBtnActionPerformed
+        // TODO add your handling code here:
+         new ViewPayslip(loggedInUsername, loggedInRole, service).setVisible(true);
+         this.dispose();
+    }//GEN-LAST:event_ViewPayslipBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -166,6 +187,7 @@ public class AdminDashboard extends javax.swing.JFrame {
     private javax.swing.JButton EditProfileBtn;
     private javax.swing.JButton GeneratePayslipBtn;
     private javax.swing.JButton LogoutBtn;
+    private javax.swing.JButton ViewPayslipBtn;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

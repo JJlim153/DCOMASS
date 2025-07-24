@@ -37,6 +37,7 @@ public class HRDashboard extends javax.swing.JFrame {
         this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
+        System.out.println("Hi" + username);
     }
 
     /**
@@ -55,6 +56,7 @@ public class HRDashboard extends javax.swing.JFrame {
         PayrollReportBtn = new javax.swing.JButton();
         PayslipBtn = new javax.swing.JButton();
         GeneratePayslipBtn = new javax.swing.JButton();
+        ViewPayslipBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -103,6 +105,13 @@ public class HRDashboard extends javax.swing.JFrame {
             }
         });
 
+        ViewPayslipBtn.setText("View Payslip");
+        ViewPayslipBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ViewPayslipBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -131,6 +140,10 @@ public class HRDashboard extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(GeneratePayslipBtn)
                         .addGap(19, 19, 19))))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(174, 174, 174)
+                .addComponent(ViewPayslipBtn)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -145,7 +158,9 @@ public class HRDashboard extends javax.swing.JFrame {
                     .addComponent(UserStatusBtn)
                     .addComponent(EditProfileBtn)
                     .addComponent(GeneratePayslipBtn))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 78, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(ViewPayslipBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(PayrollReportBtn)
                     .addComponent(PayslipBtn))
@@ -212,6 +227,12 @@ public class HRDashboard extends javax.swing.JFrame {
          this.dispose();
     }//GEN-LAST:event_GeneratePayslipBtnActionPerformed
 
+    private void ViewPayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewPayslipBtnActionPerformed
+        // TODO add your handling code here:
+        new ViewPayslip(loggedInUsername, loggedInRole, service).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_ViewPayslipBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -254,6 +275,7 @@ public class HRDashboard extends javax.swing.JFrame {
     private javax.swing.JButton PayrollReportBtn;
     private javax.swing.JButton PayslipBtn;
     private javax.swing.JButton UserStatusBtn;
+    private javax.swing.JButton ViewPayslipBtn;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }
