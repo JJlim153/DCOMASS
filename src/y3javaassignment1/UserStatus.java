@@ -42,8 +42,11 @@ public class UserStatus extends javax.swing.JFrame {
                 new String[]{"Username", "Role", "Status"}, 0
             );
             for (String[] user : users) {
-                model.addRow(user);
+                if (user.length >= 7) { // make sure the array is not too short
+                    model.addRow(new String[]{user[0], user[5], user[6]}); // username, role, status
+                }
             }
+
             userTable.setModel(model);
         } catch (Exception e) {
             e.printStackTrace();

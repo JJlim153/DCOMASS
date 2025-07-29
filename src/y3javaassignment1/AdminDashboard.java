@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 package y3javaassignment1;
+import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -14,6 +16,8 @@ public class AdminDashboard extends javax.swing.JFrame {
     private String loggedInUsername;
     private PayrollService service;
     private String loggedInRole;
+    private AdminDashboard parent;
+    
     /**
      * Creates new form AdminDashboard
      */
@@ -26,9 +30,20 @@ public class AdminDashboard extends javax.swing.JFrame {
         this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
-        System.out.println("Hi" + username);
+        System.out.println("Hi " + username);
         // You could also display the username:
         // jLabelWelcome.setText("Welcome, " + username);
+        // Set dynamic welcome text
+        WelcomeText.setText("Welcome, " + loggedInUsername + "!");
+        WelcomeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WelcomeText.setPreferredSize(new java.awt.Dimension(300, 30));  // Ensure it has width
+        WelcomeText.setForeground(java.awt.Color.BLACK); // In case font color is invisible
+        
+        accountPanel = new accountDetailsPanel(this);
+        accountPanel.setVisible(false);
+        accountPanel.setBounds(0, 0, this.getWidth(), this.getHeight());
+        this.add(accountPanel);
+
     }
 
     /**
@@ -41,22 +56,20 @@ public class AdminDashboard extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        EditProfileBtn = new javax.swing.JButton();
         LogoutBtn = new javax.swing.JButton();
-        GeneratePayslipBtn = new javax.swing.JButton();
+        ConfigurePayButton = new javax.swing.JButton();
         ViewPayslipBtn = new javax.swing.JButton();
+        ModifyButton = new javax.swing.JButton();
+        WelcomeText = new javax.swing.JLabel();
+        ViewAccButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(400, 350));
+        setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Admin Dashboard");
-
-        EditProfileBtn.setText("Profile");
-        EditProfileBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                EditProfileBtnActionPerformed(evt);
-            }
-        });
 
         LogoutBtn.setText("Logout");
         LogoutBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -65,17 +78,35 @@ public class AdminDashboard extends javax.swing.JFrame {
             }
         });
 
-        GeneratePayslipBtn.setText("Generate Payslip");
-        GeneratePayslipBtn.addActionListener(new java.awt.event.ActionListener() {
+        ConfigurePayButton.setText("Configure Payroll");
+        ConfigurePayButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                GeneratePayslipBtnActionPerformed(evt);
+                ConfigurePayButtonActionPerformed(evt);
             }
         });
 
-        ViewPayslipBtn.setText("View Payslip");
+        ViewPayslipBtn.setText("View Payslips");
         ViewPayslipBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ViewPayslipBtnActionPerformed(evt);
+            }
+        });
+
+        ModifyButton.setText("Modify Users");
+        ModifyButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ModifyButtonActionPerformed(evt);
+            }
+        });
+
+        WelcomeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WelcomeText.setText("Welcome, [username]!");
+        WelcomeText.setPreferredSize(new java.awt.Dimension(300, 25));
+
+        ViewAccButton.setText("View Account Details");
+        ViewAccButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ViewAccButtonActionPerformed(evt);
             }
         });
 
@@ -83,51 +114,51 @@ public class AdminDashboard extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(WelcomeText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 98, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(26, 26, 26)
-                .addComponent(LogoutBtn))
-            .addGroup(layout.createSequentialGroup()
+                .addGap(53, 53, 53)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(ViewAccButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ModifyButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(39, 39, 39)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(ViewPayslipBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(ConfigurePayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(53, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addComponent(EditProfileBtn)
-                        .addGap(72, 72, 72)
-                        .addComponent(GeneratePayslipBtn))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(137, 137, 137)
-                        .addComponent(ViewPayslipBtn)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(LogoutBtn))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1))
-                    .addComponent(LogoutBtn))
-                .addGap(101, 101, 101)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(EditProfileBtn)
-                    .addComponent(GeneratePayslipBtn))
+                .addContainerGap()
+                .addComponent(jLabel1)
                 .addGap(18, 18, 18)
-                .addComponent(ViewPayslipBtn)
-                .addContainerGap(93, Short.MAX_VALUE))
+                .addComponent(WelcomeText, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ViewAccButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(ViewPayslipBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(30, 30, 30)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ConfigurePayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(ModifyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(33, 33, 33)
+                .addComponent(LogoutBtn)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+                                            
 
-    private void EditProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditProfileBtnActionPerformed
-        // TODO add your handling code here:
-        EditProfile profileForm = new EditProfile(loggedInUsername, loggedInRole, service);
-        profileForm.setLocationRelativeTo(null);
-        profileForm.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_EditProfileBtnActionPerformed
-
+    
     private void LogoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogoutBtnActionPerformed
         // TODO add your handling code here:
         Login loginForm = new Login();
@@ -136,11 +167,10 @@ public class AdminDashboard extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_LogoutBtnActionPerformed
 
-    private void GeneratePayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GeneratePayslipBtnActionPerformed
+    private void ConfigurePayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConfigurePayButtonActionPerformed
         // TODO add your handling code here:
-//        new GeneratePayslip(loggedInUsername, loggedInRole, service).setVisible(true);
-//        this.dispose();
-    }//GEN-LAST:event_GeneratePayslipBtnActionPerformed
+        new ConfigurePayrollSettingsForm(service).setVisible(true);
+    }//GEN-LAST:event_ConfigurePayButtonActionPerformed
 
     private void ViewPayslipBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewPayslipBtnActionPerformed
         // TODO add your handling code here:
@@ -148,6 +178,47 @@ public class AdminDashboard extends javax.swing.JFrame {
          this.dispose();
     }//GEN-LAST:event_ViewPayslipBtnActionPerformed
 
+    private void ModifyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModifyButtonActionPerformed
+        // TODO add your handling code here:
+        ModifyUsersForm modifyForm = new ModifyUsersForm(service);
+        modifyForm.setVisible(true);
+    }//GEN-LAST:event_ModifyButtonActionPerformed
+
+    private void ViewAccButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewAccButtonActionPerformed
+        // TODO add your handling code here:
+        try {
+        String[] profile = service.getUserProfile(loggedInUsername);
+        if (profile != null && profile.length >= 4) {
+            // Update your labels in accountPanel here
+            accountPanel.setUsername(profile[0]);
+            accountPanel.setFirstName(profile[1]);
+            accountPanel.setLastName(profile[2]);
+            accountPanel.setIC(profile[3]);
+            accountPanel.setRole(loggedInRole);
+        }
+            setDashboardComponentsVisible(false); // Hide main buttons
+            accountPanel.setVisible(true);         // Show panel
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this.getContentPane(), "Failed to fetch user details: " + e.getMessage());
+
+        }
+    }//GEN-LAST:event_ViewAccButtonActionPerformed
+    
+    public void setDashboardComponentsVisible(boolean visible) {
+        LogoutBtn.setVisible(visible);
+        ConfigurePayButton.setVisible(visible);
+        ViewPayslipBtn.setVisible(visible);
+        ModifyButton.setVisible(visible);
+        ViewAccButton.setVisible(visible);
+        WelcomeText.setVisible(visible);
+        jLabel1.setVisible(visible); // Admin Dashboard label
+    }
+
+    
+    public void setWelcomeMessage(String username) {
+        WelcomeText.setText("Welcome, " + username + "!");
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -184,10 +255,13 @@ public class AdminDashboard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton EditProfileBtn;
-    private javax.swing.JButton GeneratePayslipBtn;
+    private javax.swing.JButton ConfigurePayButton;
     private javax.swing.JButton LogoutBtn;
+    private javax.swing.JButton ModifyButton;
+    private javax.swing.JButton ViewAccButton;
     private javax.swing.JButton ViewPayslipBtn;
+    private javax.swing.JLabel WelcomeText;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
+    private accountDetailsPanel accountPanel;
 }

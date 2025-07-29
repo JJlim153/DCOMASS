@@ -7,8 +7,9 @@ package y3javaassignment1;
 
 /**
  *
- * @author Daniellim
+ * @author Daniellim & Parker
  */
+
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
 import java.sql.*;
@@ -41,6 +42,7 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
     }
     
 
+    @Override
     public boolean registerUser(
         String username,
         String password,
@@ -49,46 +51,38 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         String lastName,
         String icPassport
     ) throws RemoteException {
-        try (
-            Connection conn = DriverManager.getConnection(
-                "jdbc:derby://localhost:1527/PayrollAssignment",
-                "group18",
-                "group18"
-            )
-        ) {
+        try (Connection conn = getConnection()) {
             conn.setAutoCommit(true);
 
             // Check if username exists
-            PreparedStatement check = conn.prepareStatement(
-                "SELECT * FROM USERS WHERE USERNAME = ?"
-            );
+            PreparedStatement check = conn.prepareStatement("SELECT * FROM USERS WHERE USERNAME = ?");
             check.setString(1, username);
             ResultSet rs = check.executeQuery();
             if (rs.next()) {
                 return false; // Username exists
             }
 
+            // Check if this is the first user in the system
+            String roleToAssign = role;
+            PreparedStatement countStmt = conn.prepareStatement("SELECT COUNT(*) FROM USERS");
+            ResultSet countRs = countStmt.executeQuery();
+            if (countRs.next() && countRs.getInt(1) == 0) {
+                roleToAssign = "admin"; // Auto assign role
+            }
+
             // Insert into USERS
-            PreparedStatement insertUser = conn.prepareStatement(
-                "INSERT INTO USERS (USERNAME, PASSWORD, ROLE, STATUS) VALUES (?, ?, ?, ?)"
+            PreparedStatement insert = conn.prepareStatement(
+                "INSERT INTO USERS (USERNAME, PASSWORD, ROLE, STATUS, FIRSTNAME, LASTNAME, IC_PASSPORT) VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
-            insertUser.setString(1, username);
-            insertUser.setString(2, password);
-            insertUser.setString(3, role);
-            insertUser.setString(4, "Pending");
-            insertUser.executeUpdate();
+            insert.setString(1, username);
+            insert.setString(2, password);
+            insert.setString(3, roleToAssign);
+            insert.setString(4, "Pending");
+            insert.setString(5, firstName);
+            insert.setString(6, lastName);
+            insert.setString(7, icPassport);
 
-            // Insert into USERINFO
-            PreparedStatement insertInfo = conn.prepareStatement(
-                "INSERT INTO USERINFO (USERNAME, FIRSTNAME, LASTNAME, ICPASSPORT) VALUES (?, ?, ?, ?)"
-            );
-            insertInfo.setString(1, username);
-            insertInfo.setString(2, firstName);
-            insertInfo.setString(3, lastName);
-            insertInfo.setString(4, icPassport);
-            insertInfo.executeUpdate();
-
-            return true;
+            return insert.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -125,26 +119,49 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         }
     }
 
+    @Override
+    public List<PayrollRecord> getAllPayslips() throws RemoteException {
+        List<PayrollRecord> list = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM PAYROLL ORDER BY PAY_DATE DESC");
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(new PayrollRecord(
+                    rs.getString("USERNAME"),                    
+                    rs.getDate("PAY_DATE"),
+                    rs.getDouble("BASE_SALARY"),
+                    rs.getDouble("BONUS"),
+                    rs.getDouble("EPF"),
+                    rs.getDouble("SOCSO"),
+                    rs.getDouble("ANNUALINCOME")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RemoteException("Error fetching all payslips: " + e.getMessage());
+        }
+        return list;
+    }
 
     
+    @Override
     public List<String[]> getAllUsers() throws RemoteException {
         List<String[]> users = new ArrayList<>();
-        try (
-            Connection conn = DriverManager.getConnection(
-                "jdbc:derby://localhost:1527/PayrollAssignment",
-                "group18",
-                "group18"
-            )
-        ) {
-            conn.setAutoCommit(true);
-
+        try (Connection conn = getConnection()) {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT USERNAME, ROLE, STATUS FROM USERS");
+            ResultSet rs = stmt.executeQuery(
+                "SELECT USERNAME, PASSWORD, FIRSTNAME, LASTNAME, IC_PASSPORT, ROLE, STATUS FROM USERS"
+            );
             while (rs.next()) {
                 String username = rs.getString("USERNAME");
+                String password = rs.getString("PASSWORD");
+                String firstName = rs.getString("FIRSTNAME");
+                String lastName = rs.getString("LASTNAME");
+                String ic = rs.getString("IC_PASSPORT");
                 String role = rs.getString("ROLE");
                 String status = rs.getString("STATUS");
-                users.add(new String[]{username, role, status});
+
+                users.add(new String[]{username, password, firstName, lastName, ic, role, status});
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -152,6 +169,7 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         }
         return users;
     }
+
 
 
 
@@ -180,52 +198,51 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
     }
 
 
+    @Override
     public String[] getUserProfile(String username) throws RemoteException {
-        try (
-            Connection conn = DriverManager.getConnection("jdbc:derby://localhost:1527/PayrollAssignment", "group18", "group18")
-        ) {
-            String[] data = new String[4];
-            // Load password
-            PreparedStatement ps1 = conn.prepareStatement("SELECT PASSWORD FROM USERS WHERE USERNAME = ?");
-            ps1.setString(1, username);
-            ResultSet rs1 = ps1.executeQuery();
-            if (rs1.next()) {
-                data[0] = rs1.getString("PASSWORD");
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                "SELECT PASSWORD, FIRSTNAME, LASTNAME, IC_PASSPORT FROM USERS WHERE USERNAME = ?"
+            );
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new String[] {
+                    rs.getString("PASSWORD"),
+                    rs.getString("FIRSTNAME"),
+                    rs.getString("LASTNAME"),
+                    rs.getString("IC_PASSPORT")
+                };
             }
-            // Load personal info
-            PreparedStatement ps2 = conn.prepareStatement("SELECT FIRSTNAME, LASTNAME, ICPASSPORT FROM USERINFO WHERE USERNAME = ?");
-            ps2.setString(1, username);
-            ResultSet rs2 = ps2.executeQuery();
-            if (rs2.next()) {
-                data[1] = rs2.getString("FIRSTNAME");
-                data[2] = rs2.getString("LASTNAME");
-                data[3] = rs2.getString("ICPASSPORT");
-            }
-            return data;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RemoteException("Error loading profile: " + e.getMessage());
+            throw new RemoteException("Error loading user profile: " + e.getMessage());
         }
+        return null;
     }
 
 
+
+    @Override
     public boolean updateUserProfile(String username, String password, String firstName, String lastName, String icPassport) throws RemoteException {
-        try (
-            Connection conn = DriverManager.getConnection("jdbc:derby://localhost:1527/PayrollAssignment", "group18", "group18")
-        ) {
+        try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
-            // Update password
-            PreparedStatement ps1 = conn.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?");
-            ps1.setString(1, password);
-            ps1.setString(2, username);
-            ps1.executeUpdate();
-            // Update personal info
-            PreparedStatement ps2 = conn.prepareStatement("UPDATE USERINFO SET FIRSTNAME = ?, LASTNAME = ?, ICPASSPORT = ? WHERE USERNAME = ?");
+
+            if (password != null && !password.trim().isEmpty()) {
+                PreparedStatement ps = conn.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?");
+                ps.setString(1, password);
+                ps.setString(2, username);
+                ps.executeUpdate();
+            }
+
+            PreparedStatement ps2 = conn.prepareStatement("UPDATE USERS SET FIRSTNAME = ?, LASTNAME = ?, IC_PASSPORT = ? WHERE USERNAME = ?");
             ps2.setString(1, firstName);
             ps2.setString(2, lastName);
             ps2.setString(3, icPassport);
             ps2.setString(4, username);
             ps2.executeUpdate();
+
             conn.commit();
             return true;
         } catch (SQLException e) {
@@ -233,6 +250,7 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
             throw new RemoteException("Error updating profile: " + e.getMessage());
         }
     }
+
     
     
          
@@ -333,11 +351,17 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
     }
 
     @Override
-    public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus, double epf, double socso) throws RemoteException {
+    public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus) throws RemoteException {
         try (Connection conn = getConnection()) {
-            double annual = base + bonus - epf - socso;
 
-            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, ANUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PayrollSettings settings = getPayrollSettings(); // Fetch current rates
+
+            double epf = base * settings.getEpfRate();
+            double socso = base * settings.getSocsoRate();
+            double tax = base * settings.getTaxRate();
+            double annualIncome = base * 12;
+
+            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, username);
             ps.setDate(2, payDate);
@@ -345,17 +369,20 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
             ps.setDouble(4, bonus);
             ps.setDouble(5, epf);
             ps.setDouble(6, socso);
-            ps.setDouble(7, annual);
+            ps.setDouble(7, tax);
+            ps.setDouble(8, annualIncome);
 
             return ps.executeUpdate() > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RemoteException("Error inserting payslip: " + e.getMessage());
         }
     }
 
+
     @Override
-public List<PayrollRecord> getPayslipsForUser(String username) throws RemoteException {
+    public List<PayrollRecord> getPayslipsForUser(String username) throws RemoteException {
     List<PayrollRecord> list = new ArrayList<>();
     try (Connection conn = getConnection()) {
         PreparedStatement ps = conn.prepareStatement(
@@ -366,19 +393,74 @@ public List<PayrollRecord> getPayslipsForUser(String username) throws RemoteExce
 
         while (rs.next()) {
             list.add(new PayrollRecord(
+                rs.getString("USERNAME"),                    
                 rs.getDate("PAY_DATE"),
                 rs.getDouble("BASE_SALARY"),
                 rs.getDouble("BONUS"),
                 rs.getDouble("EPF"),
                 rs.getDouble("SOCSO"),
-                rs.getDouble("ANUALINCOME")
+                rs.getDouble("ANNUALINCOME")
             ));
         }
     } catch (SQLException e) {
         throw new RemoteException("Error loading payslips: " + e.getMessage());
     }
-    return list;
-}
+        return list;
+    }
+    
+    @Override
+    public PayrollSettings getPayrollSettings() throws RemoteException {
+        try (Connection conn = getConnection()) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT EPF_RATE, SOCSO_RATE, TAX_RATE FROM PAYROLLSETTINGS FETCH FIRST ROW ONLY");
+            if (rs.next()) {
+                return new PayrollSettings(
+                    rs.getDouble("EPF_RATE"),
+                    rs.getDouble("SOCSO_RATE"),
+                    rs.getDouble("TAX_RATE")
+                );
+            } else {
+                // Default fallback if no config found
+                return new PayrollSettings(0.11, 0.005, 0.05);
+            }
+        } catch (SQLException e) {
+            throw new RemoteException("Error fetching settings: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public boolean updatePayrollSettings(double epfRate, double socsoRate, double taxRate) throws RemoteException {
+        try (Connection conn = getConnection()) {
+            // Simple logic: truncate and insert new
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("DELETE FROM PAYROLLSETTINGS");
+
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO PAYROLLSETTINGS (EPF_RATE, SOCSO_RATE, TAX_RATE) VALUES (?, ?, ?)");
+            ps.setDouble(1, epfRate);
+            ps.setDouble(2, socsoRate);
+            ps.setDouble(3, taxRate);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RemoteException("Error updating settings: " + e.getMessage());
+        }
+    }
+
+
+    
+    @Override
+    public boolean hasAnyUsers() throws RemoteException {
+        try (Connection conn = getConnection()) {
+            String sql = "SELECT COUNT(*) FROM USERS";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }
 

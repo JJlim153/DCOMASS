@@ -170,7 +170,11 @@ public class Login extends javax.swing.JFrame {
                         } else if (role.equalsIgnoreCase("HR")) {
                             new HRDashboard(username, service, role).setVisible(true);
                         } else if (role.equalsIgnoreCase("Admin")) {
-                            new AdminDashboard(username, service, role).setVisible(true);
+                            AdminDashboard adminForm = new AdminDashboard(username, service, role);
+                            adminForm.setWelcomeMessage(username); // <-- Set the label text after it's initialized
+                            adminForm.setLocationRelativeTo(null);
+                            adminForm.setVisible(true);
+
                         }
                         this.dispose();
                     } else {

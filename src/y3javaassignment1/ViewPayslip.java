@@ -38,6 +38,7 @@ public class ViewPayslip extends JFrame {
 
         // Back button
         JButton backButton = new JButton("Back");
+        
         backButton.addActionListener(e -> {
             dispose();
             switch (loggedInRole) {
@@ -60,14 +61,24 @@ public class ViewPayslip extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
+
+    
     private void loadPayslipData() {
         try {
-            List<PayrollRecord> records = service.getPayslipsForUser(loggedInUsername);
-            String[] columns = {"Date", "Base Salary", "Bonus", "EPF", "SOCSO", "Annual Income"};
+            List<PayrollRecord> records;
 
+            if (loggedInRole.equalsIgnoreCase("HR") || loggedInRole.equalsIgnoreCase("Admin")) {
+                records = service.getAllPayslips(); // Fetch all
+            } else {
+                records = service.getPayslipsForUser(loggedInUsername); // Only user's own
+            }
+
+            String[] columns = {"Username", "Date", "Base Salary", "Bonus", "EPF", "SOCSO", "Annual Income"};
             DefaultTableModel model = new DefaultTableModel(columns, 0);
+
             for (PayrollRecord record : records) {
                 Object[] row = {
+                    record.getUsername() != null ? record.getUsername() : loggedInUsername, // fallback if needed
                     record.getPayDate().toString(),
                     record.getBaseSalary(),
                     record.getBonus(),
@@ -77,10 +88,13 @@ public class ViewPayslip extends JFrame {
                 };
                 model.addRow(row);
             }
+
             payslipTable.setModel(model);
+
         } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Error loading payslip data: " + e.getMessage());
         }
     }
+
 }
 

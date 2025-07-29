@@ -2,6 +2,7 @@ package y3javaassignment1;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.sql.Date;
 import java.util.List;
 
 public interface PayrollService extends Remote {
@@ -15,6 +16,10 @@ public interface PayrollService extends Remote {
         String lastName,
         String icPassport
     ) throws RemoteException;
+    
+    boolean hasAnyUsers() throws RemoteException;
+    List<PayrollRecord> getAllPayslips() throws RemoteException;
+
 
     // Login
     LoginResult loginUser(String username, String password) throws RemoteException;
@@ -37,10 +42,14 @@ public interface PayrollService extends Remote {
     List<PayrollSummary> generatePayrollReport() throws RemoteException;
     PayrollSummary getPayslip(String username) throws RemoteException;
     
+    PayrollSettings getPayrollSettings() throws RemoteException;
+    boolean updatePayrollSettings(double epfRate, double socsoRate, double taxRate) throws RemoteException;
+
+    
     List<String> getApprovedUsernames() throws RemoteException;
     PayrollSummary getLatestPayrollForUser(String username) throws RemoteException;
-    boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus, double epf, double socso) throws RemoteException;
+    boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException;
     List<PayrollRecord> getPayslipsForUser(String username) throws RemoteException;
-
+   
 
 }
