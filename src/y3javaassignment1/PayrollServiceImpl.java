@@ -43,51 +43,51 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
     
 
     @Override
-    public boolean registerUser(
-        String username,
-        String password,
-        String role,
-        String firstName,
-        String lastName,
-        String icPassport
-    ) throws RemoteException {
+    public boolean registerUser(String username, String password, String role,
+                                String firstName, String lastName, String ic) throws RemoteException {
         try (Connection conn = getConnection()) {
-            conn.setAutoCommit(true);
 
-            // Check if username exists
-            PreparedStatement check = conn.prepareStatement("SELECT * FROM USERS WHERE USERNAME = ?");
-            check.setString(1, username);
-            ResultSet rs = check.executeQuery();
-            if (rs.next()) {
+            // 🔍 Step 1: Check for existing username first
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM USERS WHERE username = ?");
+            checkStmt.setString(1, username);
+            ResultSet checkResult = checkStmt.executeQuery();
+            if (checkResult.next()) {
                 return false; // Username exists
             }
 
-            // Check if this is the first user in the system
-            String roleToAssign = role;
-            PreparedStatement countStmt = conn.prepareStatement("SELECT COUNT(*) FROM USERS");
-            ResultSet countRs = countStmt.executeQuery();
-            if (countRs.next() && countRs.getInt(1) == 0) {
-                roleToAssign = "admin"; // Auto assign role
+            // ✅ Step 2: Count total users (now we know this is a new username)
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM USERS");
+            rs.next();
+            int userCount = rs.getInt(1);
+
+            // ✅ Step 3: Decide status/role
+            String status = "Pending";
+            if (userCount == 0) {
+                role = "Admin";
+                status = "Approved";
             }
 
-            // Insert into USERS
-            PreparedStatement insert = conn.prepareStatement(
-                "INSERT INTO USERS (USERNAME, PASSWORD, ROLE, STATUS, FIRSTNAME, LASTNAME, IC_PASSPORT) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            // ✅ Step 4: Insert
+            PreparedStatement insertStmt = conn.prepareStatement(
+                "INSERT INTO USERS (username, password, role, firstName, lastName, ic_passport, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
-            insert.setString(1, username);
-            insert.setString(2, password);
-            insert.setString(3, roleToAssign);
-            insert.setString(4, "Pending");
-            insert.setString(5, firstName);
-            insert.setString(6, lastName);
-            insert.setString(7, icPassport);
+            insertStmt.setString(1, username);
+            insertStmt.setString(2, password);
+            insertStmt.setString(3, role);
+            insertStmt.setString(4, firstName);
+            insertStmt.setString(5, lastName);
+            insertStmt.setString(6, ic);
+            insertStmt.setString(7, status);
 
-            return insert.executeUpdate() > 0;
-        } catch (SQLException e) {
+            return insertStmt.executeUpdate() > 0;
+
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
 
     
     public LoginResult loginUser(String username, String password) throws RemoteException {

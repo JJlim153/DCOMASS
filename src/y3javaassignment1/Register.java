@@ -59,7 +59,7 @@ public class Register extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabel1.setText("Register Page");
 
-        jLabel2.setText("UserName:");
+        jLabel2.setText("Username:");
 
         jLabel3.setText("Password:");
 
@@ -69,7 +69,7 @@ public class Register extends javax.swing.JFrame {
 
         jLabel6.setText("Last Name:");
 
-        jLabel7.setText("IC/Password:");
+        jLabel7.setText("IC/Passport:");
 
         UserNameTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -109,7 +109,7 @@ public class Register extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(77, Short.MAX_VALUE)
+                .addContainerGap(83, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(jLabel2)
