@@ -1,24 +1,11 @@
 - first user forced to admin role
 - change admin dashboard view profile button to HR one
--* admin edit user bugged
+Done -* admin edit user bugged
 - View payslip change annual to net pay
 - code cleaning
-- Add Generate Total Summary based on month / year
-- Multi-threading for generate slip based on employee role
+Done - Add Generate Total Summary based on month / year
+Done - Multi-threading for generate slip based on employee role
 
-
-
-
-
-Latest update: 
-- Report Generation Added (HR)
-- All functionalities completed 
-- Database Updated
-
-To do:
-- Clean up UI
-- Finalize Code
-- Multi-Threading??
 
 
 LIBRARY IMPORT
@@ -46,6 +33,16 @@ CREATE TABLE USERS (
     LASTNAME VARCHAR(255),
     IC_PASSPORT VARCHAR(20),
     STATUS VARCHAR(50)
+);
+
+-- Table for subrole
+CREATE TABLE EmployeeSubRoles (
+    USERNAME VARCHAR(255) PRIMARY KEY,
+    ROLE VARCHAR(20) NOT NULL,
+    SUBROLE VARCHAR(50) NOT NULL,
+    CONSTRAINT fk_user_subrole FOREIGN KEY (username)
+        REFERENCES USERS(username)
+        ON DELETE CASCADE
 );
  
 
