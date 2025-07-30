@@ -24,21 +24,21 @@ public class ConfigurePayrollSettingsForm extends JFrame {
         // Labels and Fields
         gbc.gridx = 0;
         gbc.gridy = 0;
-        add(new JLabel("EPF Rate:"), gbc);
+        add(new JLabel("EPF Rate (%):"), gbc);
         epfField = new JTextField(10);
         gbc.gridx = 1;
         add(epfField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
-        add(new JLabel("SOCSO Rate:"), gbc);
+        add(new JLabel("SOCSO Rate (%):"), gbc);
         socsoField = new JTextField(10);
         gbc.gridx = 1;
         add(socsoField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
-        add(new JLabel("TAX Rate:"), gbc);
+        add(new JLabel("TAX Rate(%):"), gbc);
         taxField = new JTextField(10);
         gbc.gridx = 1;
         add(taxField, gbc);
