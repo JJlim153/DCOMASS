@@ -1,11 +1,9 @@
+Remove if completed
+
 - first user forced to admin role
 - change admin dashboard view profile button to HR one
-Done -* admin edit user bugged
 - View payslip change annual to net pay
 - code cleaning
-Done - Add Generate Total Summary based on month / year
-Done - Multi-threading for generate slip based on employee role
-
 
 
 LIBRARY IMPORT
