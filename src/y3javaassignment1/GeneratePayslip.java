@@ -158,19 +158,20 @@ public class GeneratePayslip extends JFrame {
             double epf = gross * epfRate;
             double socso = gross * socsoRate;
             double tax = gross * taxRate;
-            double annualIncome = base; // or use (base * 12) depending on your intent
+//            double annualIncome = base; // or use (base * 12) depending on your intent
 
-            double netSalary = gross - epf - socso - tax;
+            double annualIncome = gross - epf - socso - tax;
+
 
             // Step 3: Call updated backend insertPayslip
-            boolean success = service.insertPayslip(username, payDate, base, bonus);
+            boolean success = service.insertPayslip(username, payDate, base, bonus, epf, socso, tax, annualIncome);
 
 
             // Step 4: Feedback to user
             if (success) {
                 JOptionPane.showMessageDialog(this,
                     String.format("Payslip generated!\nGross: RM %.2f\nEPF: RM %.2f\nSOCSO: RM %.2f\nTAX: RM %.2f\nNet: RM %.2f",
-                        gross, epf, socso, tax, netSalary));
+                        gross, epf, socso, tax, annualIncome));
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to insert payslip.");
             }

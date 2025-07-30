@@ -3,27 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/PayrollService.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/AdminDashboard.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/nbproject/build-impl.xml</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/Register.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/accountDetailsPanel.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/EditProfile.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/PayrollServiceImpl.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/PayrollSummary.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/Login.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/GeneratePayslip.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/ConfigurePayrollSettingsForm.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/HRDashboard.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/EmployeeDashboard.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/ViewPayslip.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/LoginResult.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/PayrollRecord.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/MainServer.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/UserStatus.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/ModifyUsersForm.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/DateLabelFormatter.java</file>
-            <file>file:/C:/Users/Amjad%20Parker/Desktop/dcoms/DCOMASS/src/y3javaassignment1/PayslipFrame.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/PayrollService.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/AdminDashboard.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/PayslipFrame.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/ModifyUsersForm.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/MainServer.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/GeneratePayslip.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/HRDashboard.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/PayrollServiceImpl.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/ViewPayslip.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/Login.java</file>
+            <file>file:/C:/Users/PC/Documents/NetBeansProjects/DCOMASS/src/y3javaassignment1/EditProfile.java</file>
         </group>
     </open-files>
 </project-private>

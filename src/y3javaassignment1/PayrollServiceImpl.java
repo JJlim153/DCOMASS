@@ -61,11 +61,20 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
             rs.next();
             int userCount = rs.getInt(1);
 
-            // ✅ Step 3: Decide status/role
+            // ✅ Step 3: Decide status
             String status = "Pending";
-            if (userCount == 0) {
-                role = "Admin";
-                status = "Approved";
+
+            // Check if any approved Admin exists
+            PreparedStatement adminCheck = conn.prepareStatement(
+                "SELECT * FROM USERS WHERE LOWER(role) = 'admin' AND LOWER(status) = 'approved'"
+            );
+            
+            ResultSet adminResult = adminCheck.executeQuery();
+            boolean adminExists = adminResult.next();
+            System.out.println("Role: " + role + ", Admin exists: " + adminExists);
+
+            if (!adminExists && role.equalsIgnoreCase("Admin")) {
+                status = "Approved"; // First approved admin
             }
 
             // ✅ Step 4: Insert
@@ -350,35 +359,28 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
         }
     }
 
-    @Override
-    public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus) throws RemoteException {
-        try (Connection conn = getConnection()) {
+@Override
+public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus,double epf, double socso, double tax, double netpay) throws RemoteException {
+    try (Connection conn = getConnection()) {
+        String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, username);
+        ps.setDate(2, payDate);
+        ps.setDouble(3, base);
+        ps.setDouble(4, bonus);
+        ps.setDouble(5, epf);    // ✅ from frontend
+        ps.setDouble(6, socso);  // ✅ from frontend
+        ps.setDouble(7, tax);    // ✅ from frontend
+        ps.setDouble(8, netpay);
 
-            PayrollSettings settings = getPayrollSettings(); // Fetch current rates
-
-            double epf = base * settings.getEpfRate();
-            double socso = base * settings.getSocsoRate();
-            double tax = base * settings.getTaxRate();
-            double annualIncome = base * 12;
-
-            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-            ps.setDate(2, payDate);
-            ps.setDouble(3, base);
-            ps.setDouble(4, bonus);
-            ps.setDouble(5, epf);
-            ps.setDouble(6, socso);
-            ps.setDouble(7, tax);
-            ps.setDouble(8, annualIncome);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RemoteException("Error inserting payslip: " + e.getMessage());
-        }
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw new RemoteException("Error inserting payslip: " + e.getMessage());
     }
+}
+
+
 
 
     @Override

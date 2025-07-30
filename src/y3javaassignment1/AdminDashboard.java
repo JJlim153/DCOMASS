@@ -39,10 +39,6 @@ public class AdminDashboard extends javax.swing.JFrame {
         WelcomeText.setPreferredSize(new java.awt.Dimension(300, 30));  // Ensure it has width
         WelcomeText.setForeground(java.awt.Color.BLACK); // In case font color is invisible
         
-        accountPanel = new accountDetailsPanel(this);
-        accountPanel.setVisible(false);
-        accountPanel.setBounds(0, 0, this.getWidth(), this.getHeight());
-        this.add(accountPanel);
 
     }
 
@@ -61,10 +57,9 @@ public class AdminDashboard extends javax.swing.JFrame {
         ViewPayslipBtn = new javax.swing.JButton();
         ModifyButton = new javax.swing.JButton();
         WelcomeText = new javax.swing.JLabel();
-        ViewAccButton = new javax.swing.JButton();
+        EditProfileBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(400, 350));
         setResizable(false);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
@@ -103,10 +98,10 @@ public class AdminDashboard extends javax.swing.JFrame {
         WelcomeText.setText("Welcome, [username]!");
         WelcomeText.setPreferredSize(new java.awt.Dimension(300, 25));
 
-        ViewAccButton.setText("View Account Details");
-        ViewAccButton.addActionListener(new java.awt.event.ActionListener() {
+        EditProfileBtn.setText("Profile");
+        EditProfileBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ViewAccButtonActionPerformed(evt);
+                EditProfileBtnActionPerformed(evt);
             }
         });
 
@@ -116,16 +111,6 @@ public class AdminDashboard extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(WelcomeText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(53, 53, 53)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(ViewAccButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(ModifyButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(39, 39, 39)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(ViewPayslipBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ConfigurePayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(53, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -133,6 +118,16 @@ public class AdminDashboard extends javax.swing.JFrame {
                         .addComponent(LogoutBtn))
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(53, 53, 53)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(EditProfileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ModifyButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(39, 39, 39)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(ViewPayslipBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(ConfigurePayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(89, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -143,7 +138,7 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addComponent(WelcomeText, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(ViewAccButton, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(EditProfileBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ViewPayslipBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -184,34 +179,20 @@ public class AdminDashboard extends javax.swing.JFrame {
         modifyForm.setVisible(true);
     }//GEN-LAST:event_ModifyButtonActionPerformed
 
-    private void ViewAccButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ViewAccButtonActionPerformed
-        // TODO add your handling code here:
-        try {
-        String[] profile = service.getUserProfile(loggedInUsername);
-        if (profile != null && profile.length >= 4) {
-            // Update your labels in accountPanel here
-            accountPanel.setUsername(profile[0]);
-            accountPanel.setFirstName(profile[1]);
-            accountPanel.setLastName(profile[2]);
-            accountPanel.setIC(profile[3]);
-            accountPanel.setRole(loggedInRole);
-        }
-            setDashboardComponentsVisible(false); // Hide main buttons
-            accountPanel.setVisible(true);         // Show panel
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this.getContentPane(), "Failed to fetch user details: " + e.getMessage());
-
-        }
-    }//GEN-LAST:event_ViewAccButtonActionPerformed
+    private void EditProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditProfileBtnActionPerformed
+        EditProfile profileForm = new EditProfile(loggedInUsername, loggedInRole, service);
+        profileForm.setLocationRelativeTo(null);
+        profileForm.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_EditProfileBtnActionPerformed
     
     public void setDashboardComponentsVisible(boolean visible) {
         LogoutBtn.setVisible(visible);
         ConfigurePayButton.setVisible(visible);
         ViewPayslipBtn.setVisible(visible);
         ModifyButton.setVisible(visible);
-        ViewAccButton.setVisible(visible);
-        WelcomeText.setVisible(visible);
-        jLabel1.setVisible(visible); // Admin Dashboard label
+//        ViewAccButton.setVisible(visible);
+//        WelcomeText.setVisible(visibleEditProfileBtnabel1.setVisible(visible); // Admin Dashboard label
     }
 
     
@@ -256,12 +237,12 @@ public class AdminDashboard extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ConfigurePayButton;
+    private javax.swing.JButton EditProfileBtn;
     private javax.swing.JButton LogoutBtn;
     private javax.swing.JButton ModifyButton;
-    private javax.swing.JButton ViewAccButton;
     private javax.swing.JButton ViewPayslipBtn;
     private javax.swing.JLabel WelcomeText;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
-    private accountDetailsPanel accountPanel;
+
 }

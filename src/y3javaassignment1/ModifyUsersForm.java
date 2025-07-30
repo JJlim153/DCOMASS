@@ -62,55 +62,69 @@ public class ModifyUsersForm extends javax.swing.JFrame {
 
 
 
-    private void openEditDialog() {
-        int row = userTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a user.");
-            return;
-        }
+private void openEditDialog() {
+    int row = userTable.getSelectedRow();
+    if (row == -1) {
+        JOptionPane.showMessageDialog(this, "Please select a user.");
+        return;
+    }
 
-        String username = (String) tableModel.getValueAt(row, 0);
-        String role = (String) tableModel.getValueAt(row, 1);
-        String firstName = (String) tableModel.getValueAt(row, 2);
-        String lastName = (String) tableModel.getValueAt(row, 3);
-        String ic = (String) tableModel.getValueAt(row, 4);
+    String username = (String) tableModel.getValueAt(row, 0);
+    String role = (String) tableModel.getValueAt(row, 2);
+    String firstName = (String) tableModel.getValueAt(row, 3);
+    String lastName = (String) tableModel.getValueAt(row, 4);
+    String ic = (String) tableModel.getValueAt(row, 5);
+    String currentStatus = (String) tableModel.getValueAt(row, 6);
 
-        JTextField firstNameField = new JTextField(firstName);
-        JTextField lastNameField = new JTextField(lastName);
-        JTextField icField = new JTextField(ic);
-        JTextField roleField = new JTextField(role);
-        JTextField passwordField = new JPasswordField();
+    JTextField firstNameField = new JTextField(firstName);
+    JTextField lastNameField = new JTextField(lastName);
+    JTextField icField = new JTextField(ic);
+    JTextField roleField = new JTextField(role);
+    roleField.setEditable(false); // Make role read-only
 
-        Object[] message = {
-            "First Name:", firstNameField,
-            "Last Name:", lastNameField,
-            "IC/Passport:", icField,
-            "Role:", roleField,
-            "New Password (optional):", passwordField
-        };
+    // ✅ Create dropdown for status
+    String[] statuses = {"Pending", "Approved", "Rejected"};
+    JComboBox<String> statusDropdown = new JComboBox<>(statuses);
+    statusDropdown.setSelectedItem(currentStatus);
 
-        int option = JOptionPane.showConfirmDialog(this, message, "Edit User", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            try {
-                boolean success = service.updateUserProfile(
-                        username,
-                        passwordField.getText().isEmpty() ? null : passwordField.getText(),
-                        firstNameField.getText(),
-                        lastNameField.getText(),
-                        icField.getText()
-                );
-                if (success) {
-                    JOptionPane.showMessageDialog(this, "User updated.");
-                    tableModel.setRowCount(0); // refresh
-                    loadUserData();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to update user.");
-                }
-            } catch (RemoteException e) {
-                JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+    Object[] message = {
+        "First Name:", firstNameField,
+        "Last Name:", lastNameField,
+        "IC/Passport:", icField,
+        "Role (Read-Only):", roleField,
+        "Status:", statusDropdown
+    };
+
+    int option = JOptionPane.showConfirmDialog(this, message, "Edit User", JOptionPane.OK_CANCEL_OPTION);
+    if (option == JOptionPane.OK_OPTION) {
+        try {
+            boolean profileUpdated = service.updateUserProfile(
+                    username,
+                    null, // No password update
+                    firstNameField.getText(),
+                    lastNameField.getText(),
+                    icField.getText()
+            );
+
+            boolean statusUpdated = service.updateUserStatus(
+                    username,
+                    (String) statusDropdown.getSelectedItem()
+            );
+
+            if (profileUpdated || statusUpdated) {
+                JOptionPane.showMessageDialog(this, "User updated.");
+                tableModel.setRowCount(0); // refresh table
+                loadUserData();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update user.");
             }
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }
+}
+
+
 
     private JTable userTable;
     private DefaultTableModel tableModel;

@@ -48,7 +48,7 @@ public interface PayrollService extends Remote {
     
     List<String> getApprovedUsernames() throws RemoteException;
     PayrollSummary getLatestPayrollForUser(String username) throws RemoteException;
-    boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException;
+    boolean insertPayslip(String username, Date payDate, double base, double bonus, double epf, double socso, double tax, double netpay)throws RemoteException;
     List<PayrollRecord> getPayslipsForUser(String username) throws RemoteException;
    
 
