@@ -463,6 +463,124 @@ public boolean insertPayslip(String username, java.sql.Date payDate, double base
         }
         return false;
     }
+    
+    // Generate Payroll
+    
+    @Override
+    public List<String> getDistinctSubroles() throws RemoteException {
+        List<String> subroles = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT DISTINCT SUBROLE FROM EMPLOYEESUBROLES");
+            while (rs.next()) {
+                subroles.add(rs.getString("SUBROLE"));
+            }
+        } catch (SQLException e) {
+            throw new RemoteException("Error fetching subroles: " + e.getMessage());
+        }
+        return subroles;
+    }
+
+    @Override
+    public List<String> getUsernamesBySubrole(String subrole) throws RemoteException {
+        List<String> usernames = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT USERNAME FROM EMPLOYEESUBROLES WHERE SUBROLE = ?");
+            ps.setString(1, subrole);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                usernames.add(rs.getString("USERNAME"));
+            }
+        } catch (SQLException e) {
+            throw new RemoteException("Error fetching usernames by subrole: " + e.getMessage());
+        }
+        return usernames;
+    }
+    
+    @Override
+    public boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException {
+        try (Connection conn = getConnection()) {
+            PayrollSettings settings = getPayrollSettings();
+
+            double epf = base * settings.getEpfRate();
+            double socso = base * settings.getSocsoRate();
+            double tax = base * settings.getTaxRate();
+            double annualIncome = (base + bonus) - epf - socso - tax;
+
+            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, username);
+            ps.setDate(2, payDate);
+            ps.setDouble(3, base);
+            ps.setDouble(4, bonus);
+            ps.setDouble(5, epf);
+            ps.setDouble(6, socso);
+            ps.setDouble(7, tax);
+            ps.setDouble(8, annualIncome);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RemoteException("Error inserting payslip (group): " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public String getSubroleForUser(String username) throws RemoteException {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT subrole FROM EmployeeSubRoles WHERE username = ?")) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ? rs.getString("subrole") : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException("Error fetching subrole", e);
+        }
+    }
+
+    @Override
+    public boolean updateSubroleForUser(String username, String subrole) throws RemoteException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT username FROM EmployeeSubRoles WHERE username = ?");
+            checkStmt.setString(1, username);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                // update existing
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE EmployeeSubRoles SET subrole = ? WHERE username = ?");
+                updateStmt.setString(1, subrole);
+                updateStmt.setString(2, username);
+                return updateStmt.executeUpdate() > 0;
+            } else {
+                // insert new
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EmployeeSubRoles (username, role, subrole) VALUES (?, 'Employee', ?)");
+                insertStmt.setString(1, username);
+                insertStmt.setString(2, subrole);
+                return insertStmt.executeUpdate() > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException("Error updating subrole", e);
+        }
+    }
+
+    // IC Validation
+    
+    @Override
+    public boolean icPassportExists(String icPassport) throws RemoteException {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM USERS WHERE IC_Passport = ?")) {
+            ps.setString(1, icPassport);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 }
 

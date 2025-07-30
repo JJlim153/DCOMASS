@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class PayrollReportTable extends JFrame {
     private PayrollService service;
-    private JComboBox<String> userFilter, monthFilter, yearFilter, sortFilter, sortOrder;
+    private JComboBox<String> userFilter, monthFilter, yearFilter, sortFilter, sortOrder, viewMode;
     private JTable table;
     private DefaultTableModel model;
     private JLabel totalBaseLabel, totalBonusLabel, totalEPFLabel, totalSOCSOLabel, totalTaxLabel, totalNetLabel;
@@ -31,6 +31,7 @@ public class PayrollReportTable extends JFrame {
         yearFilter = new JComboBox<>();
         sortFilter = new JComboBox<>(new String[]{"None", "Net Pay", "Base Salary", "Date"});
         sortOrder = new JComboBox<>(new String[]{"Ascending", "Descending"});
+        viewMode = new JComboBox<>(new String[]{"Detailed View", "Summary View"});
 
         topPanel.add(new JLabel("Filter by User:"));
         topPanel.add(userFilter);
@@ -41,6 +42,8 @@ public class PayrollReportTable extends JFrame {
         topPanel.add(new JLabel("Sort by:"));
         topPanel.add(sortFilter);
         topPanel.add(sortOrder);
+        topPanel.add(new JLabel("View Mode:"));
+        topPanel.add(viewMode);
 
         JButton filterBtn = new JButton("Apply Filter");
         filterBtn.addActionListener(e -> loadFilteredReport());
@@ -49,8 +52,7 @@ public class PayrollReportTable extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         // Table setup
-        String[] columns = {"Username", "Date", "Base", "Bonus", "EPF", "SOCSO", "TAX", "Net"};
-        model = new DefaultTableModel(columns, 0);
+        model = new DefaultTableModel();
         table = new JTable(model);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
@@ -114,7 +116,6 @@ public class PayrollReportTable extends JFrame {
 
     private void loadFilteredReport() {
         try {
-            model.setRowCount(0); // Clear table
             List<PayrollRecord> records = service.getAllPayslips();
 
             Calendar cal = Calendar.getInstance();
@@ -134,17 +135,23 @@ public class PayrollReportTable extends JFrame {
                 return matchUser && matchMonth && matchYear;
             }).collect(Collectors.toList());
 
-            // Sorting
+            String mode = viewMode.getSelectedItem().toString();
+            if (mode.equals("Summary View")) {
+                loadSummaryReport(filtered);
+                return;
+            }
+
+            // Detailed View
+            model.setRowCount(0);
+            model.setColumnIdentifiers(new String[]{"Username", "Date", "Base", "Bonus", "EPF", "SOCSO", "TAX", "Net"});
+
             String sortBy = sortFilter.getSelectedItem().toString();
             boolean ascending = sortOrder.getSelectedItem().equals("Ascending");
 
             Comparator<PayrollRecord> comparator = null;
-
             switch (sortBy) {
                 case "Net Pay":
-                    comparator = Comparator.comparingDouble(pr ->
-                        pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso() - pr.getTax()
-                    );
+                    comparator = Comparator.comparingDouble(pr -> pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso() - pr.getTax());
                     break;
                 case "Base Salary":
                     comparator = Comparator.comparingDouble(PayrollRecord::getBaseSalary);
@@ -152,24 +159,13 @@ public class PayrollReportTable extends JFrame {
                 case "Date":
                     comparator = Comparator.comparing(PayrollRecord::getPayDate);
                     break;
-                default:
-                    comparator = null;
             }
-
-            if (comparator != null) {
-            if (!ascending) {
-                comparator = comparator.reversed();
-            }
-            filtered.sort(comparator);
-        }
-
 
             if (comparator != null) {
                 if (!ascending) comparator = comparator.reversed();
                 filtered.sort(comparator);
             }
 
-            // Totals
             double totalBase = 0, totalBonus = 0, totalEPF = 0, totalSOCSO = 0, totalTax = 0, totalNet = 0;
 
             for (PayrollRecord pr : filtered) {
@@ -204,5 +200,59 @@ public class PayrollReportTable extends JFrame {
         } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Failed to load report: " + e.getMessage());
         }
+    }
+
+    private void loadSummaryReport(List<PayrollRecord> records) {
+        model.setRowCount(0);
+        model.setColumnIdentifiers(new String[]{"Period", "Total Base", "Total Bonus", "Total EPF", "Total SOCSO", "Total Tax", "Total Net"});
+
+        Map<String, double[]> totalsMap = new TreeMap<>();
+        Calendar cal = Calendar.getInstance();
+
+        for (PayrollRecord pr : records) {
+            cal.setTime(pr.getPayDate());
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH) + 1;
+
+            String key = year + "-" + String.format("%02d", month);
+
+            double[] totals = totalsMap.getOrDefault(key, new double[6]);
+            totals[0] += pr.getBaseSalary();
+            totals[1] += pr.getBonus();
+            totals[2] += pr.getEpf();
+            totals[3] += pr.getSocso();
+            totals[4] += pr.getTax();
+            totals[5] += pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso() - pr.getTax();
+            totalsMap.put(key, totals);
+        }
+
+        double totalBase = 0, totalBonus = 0, totalEPF = 0, totalSOCSO = 0, totalTax = 0, totalNet = 0;
+
+        for (Map.Entry<String, double[]> entry : totalsMap.entrySet()) {
+            double[] vals = entry.getValue();
+            model.addRow(new Object[]{
+                    entry.getKey(),
+                    String.format("RM %.2f", vals[0]),
+                    String.format("RM %.2f", vals[1]),
+                    String.format("RM %.2f", vals[2]),
+                    String.format("RM %.2f", vals[3]),
+                    String.format("RM %.2f", vals[4]),
+                    String.format("RM %.2f", vals[5])
+            });
+
+            totalBase += vals[0];
+            totalBonus += vals[1];
+            totalEPF += vals[2];
+            totalSOCSO += vals[3];
+            totalTax += vals[4];
+            totalNet += vals[5];
+        }
+
+        totalBaseLabel.setText(String.format("Total Base: RM %.2f", totalBase));
+        totalBonusLabel.setText(String.format("Total Bonus: RM %.2f", totalBonus));
+        totalEPFLabel.setText(String.format("Total EPF: RM %.2f", totalEPF));
+        totalSOCSOLabel.setText(String.format("Total SOCSO: RM %.2f", totalSOCSO));
+        totalTaxLabel.setText(String.format("Total Tax: RM %.2f", totalTax));
+        totalNetLabel.setText(String.format("Total Net: RM %.2f", totalNet));
     }
 }

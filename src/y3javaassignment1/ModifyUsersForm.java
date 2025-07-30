@@ -19,7 +19,7 @@ public class ModifyUsersForm extends javax.swing.JFrame {
         setTitle("Modify Users");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        String[] columnNames = {"Username","Password", "Role", "First Name", "Last Name", "IC/Passport", "Status"};
+        String[] columnNames = {"Username", "Password", "Role", "First Name", "Last Name", "IC/Passport", "Status", "Subrole"};
         tableModel = new DefaultTableModel(columnNames, 0);
         userTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(userTable);
@@ -41,20 +41,32 @@ public class ModifyUsersForm extends javax.swing.JFrame {
         try {
             List<String[]> users = service.getAllUsers();
             for (String[] user : users) {
-                if (user.length >= 7) {  // Ensure array is complete
+                if (user.length >= 7) {
+                    String username = user[0];
+                    String role = user[5];
+                    String subrole = "-";
+                    if ("Employee".equalsIgnoreCase(role)) {
+                        try {
+                            subrole = service.getSubroleForUser(username);
+                            if (subrole == null || subrole.trim().isEmpty()) subrole = "-";
+                        } catch (RemoteException e) {
+                            subrole = "Error";
+                        }
+                    }
+
                     tableModel.addRow(new Object[]{
                         user[0], // username
                         user[1], // password
-                        user[5], // role
+                        role,
                         user[2], // firstname
                         user[3], // lastname
                         user[4], // ic_passport
-                        user[6]  // status
+                        user[6], // status
+                        subrole
                     });
-                } else {
-                    System.err.println("Incomplete user record: " + java.util.Arrays.toString(user));
                 }
             }
+
         } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Error loading users: " + e.getMessage());
         }
@@ -86,14 +98,36 @@ private void openEditDialog() {
     String[] statuses = {"Pending", "Approved", "Rejected"};
     JComboBox<String> statusDropdown = new JComboBox<>(statuses);
     statusDropdown.setSelectedItem(currentStatus);
+    
+    String currentSubrole = (String) tableModel.getValueAt(row, 7);
+    
+    JComboBox<String> subroleDropdown = new JComboBox<>();
+    subroleDropdown.setEnabled("Employee".equalsIgnoreCase(role));
+
+    if ("Employee".equalsIgnoreCase(role)) {
+        try {
+            List<String> subroles = service.getDistinctSubroles(); // already exists for group payslip
+            for (String sr : subroles) {
+                subroleDropdown.addItem(sr);
+            }
+            subroleDropdown.setEditable(true); // allow new subroles
+            subroleDropdown.setSelectedItem("-".equals(currentSubrole) ? null : currentSubrole);
+        } catch (RemoteException e) {
+            subroleDropdown.addItem("Error loading");
+        }
+    } else {
+        subroleDropdown.addItem("-");
+    }
 
     Object[] message = {
         "First Name:", firstNameField,
         "Last Name:", lastNameField,
         "IC/Passport:", icField,
         "Role (Read-Only):", roleField,
-        "Status:", statusDropdown
+        "Status:", statusDropdown,
+        "Subrole:", subroleDropdown
     };
+
 
     int option = JOptionPane.showConfirmDialog(this, message, "Edit User", JOptionPane.OK_CANCEL_OPTION);
     if (option == JOptionPane.OK_OPTION) {
@@ -110,8 +144,17 @@ private void openEditDialog() {
                     username,
                     (String) statusDropdown.getSelectedItem()
             );
+            
+            boolean subroleUpdated = true;
+                if ("Employee".equalsIgnoreCase(role)) {
+                    String selectedSubrole = (String) subroleDropdown.getSelectedItem();
+                    if (selectedSubrole != null) {
+                        subroleUpdated = service.updateSubroleForUser(username, selectedSubrole.trim());
+                    }
+                }
 
-            if (profileUpdated || statusUpdated) {
+
+            if (profileUpdated || statusUpdated || subroleUpdated) {
                 JOptionPane.showMessageDialog(this, "User updated.");
                 tableModel.setRowCount(0); // refresh table
                 loadUserData();
@@ -122,6 +165,9 @@ private void openEditDialog() {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }
+    
+
+
 }
 
 

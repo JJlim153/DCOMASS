@@ -51,5 +51,21 @@ public interface PayrollService extends Remote {
     boolean insertPayslip(String username, Date payDate, double base, double bonus, double epf, double socso, double tax, double netpay)throws RemoteException;
     List<PayrollRecord> getPayslipsForUser(String username) throws RemoteException;
    
+    // Generate Payroll 
+    
+    List<String> getDistinctSubroles() throws RemoteException;
+
+    List<String> getUsernamesBySubrole(String subrole) throws RemoteException;
+
+    boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException;
+    
+    String getSubroleForUser(String username) throws RemoteException;
+    boolean updateSubroleForUser(String username, String subrole) throws RemoteException;
+
+    // IC Validation
+    
+    boolean icPassportExists(String icPassport) throws RemoteException;
+
+
 
 }

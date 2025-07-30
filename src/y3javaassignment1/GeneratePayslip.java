@@ -7,6 +7,8 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.jdatepicker.impl.*;
 
 public class GeneratePayslip extends JFrame {
@@ -17,13 +19,16 @@ public class GeneratePayslip extends JFrame {
     private String loggedInRole;
     private PayrollService service;
 
+    private JRadioButton individualRadio, groupRadio;
+    private ButtonGroup radioGroup;
+
     public GeneratePayslip(String loggedInUsername, String loggedInRole, PayrollService service) {
         this.service = service;
         this.loggedInUsername = loggedInUsername;
         this.loggedInRole = loggedInRole;
 
         setTitle("Generate Payslip");
-        setSize(450, 400);
+        setSize(500, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new GridBagLayout());
@@ -32,16 +37,34 @@ public class GeneratePayslip extends JFrame {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // Username Dropdown
-        JLabel userLabel = new JLabel("Select Username:");
+        // Radio buttons
+        individualRadio = new JRadioButton("Individual", true);
+        groupRadio = new JRadioButton("Group (Subrole)");
+        radioGroup = new ButtonGroup();
+        radioGroup.add(individualRadio);
+        radioGroup.add(groupRadio);
+
+        JPanel radioPanel = new JPanel(new FlowLayout());
+        radioPanel.add(individualRadio);
+        radioPanel.add(groupRadio);
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        add(radioPanel, gbc);
+        gbc.gridwidth = 1;
+
+        // Username/Subrole Dropdown
+        JLabel userLabel = new JLabel("Select:");
+        gbc.gridy++;
+        gbc.gridx = 0;
         add(userLabel, gbc);
 
         usernameComboBox = new JComboBox<>();
         gbc.gridx = 1;
         add(usernameComboBox, gbc);
-        usernameComboBox.addActionListener(e -> loadLatestPayrollData());
+        usernameComboBox.addActionListener(e -> {
+            if (individualRadio.isSelected()) loadLatestPayrollData();
+        });
 
         // Date Picker
         JLabel dateLabel = new JLabel("Select Date:");
@@ -75,36 +98,44 @@ public class GeneratePayslip extends JFrame {
         gbc.gridx = 1;
         add(bonusField, gbc);
 
-        // Load user dropdown
-        loadUsernames();
-
-        // Submit Button
+        // Submit and Back
         gbc.gridx = 1;
         gbc.gridy++;
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton generateButton = new JButton("Generate Payslip");
         JButton backButton = new JButton("Back");
         buttonPanel.add(generateButton);
         buttonPanel.add(backButton);
         add(buttonPanel, gbc);
 
-        // Generate Button Action
-        generateButton.addActionListener(e -> insertPayslip());
+        // Actions
+        generateButton.addActionListener(e -> {
+            if (individualRadio.isSelected()) {
+                insertPayslip();
+            } else {
+                insertPayslipForGroup();
+            }
+        });
 
-        // Back Button Action
         backButton.addActionListener(e -> {
-            dispose(); // close current window
+            dispose();
             new HRDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
         });
+
+        // Load default options
+        individualRadio.addActionListener(e -> loadUsernames());
+        groupRadio.addActionListener(e -> loadSubroles());
+
+        loadUsernames(); // Default load
     }
 
     private void loadUsernames() {
         try {
+            usernameComboBox.removeAllItems();
             List<String> usernames = service.getApprovedUsernames();
             for (String name : usernames) {
                 usernameComboBox.addItem(name);
             }
-
             if (!usernames.isEmpty()) {
                 usernameComboBox.setSelectedIndex(0);
                 loadLatestPayrollData();
@@ -114,7 +145,20 @@ public class GeneratePayslip extends JFrame {
         }
     }
 
+    private void loadSubroles() {
+        try {
+            usernameComboBox.removeAllItems();
+            List<String> subroles = service.getDistinctSubroles();
+            for (String sr : subroles) {
+                usernameComboBox.addItem(sr);
+            }
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Failed to load subroles: " + e.getMessage());
+        }
+    }
+
     private void loadLatestPayrollData() {
+        if (!individualRadio.isSelected()) return;
         String selectedUsername = (String) usernameComboBox.getSelectedItem();
         if (selectedUsername == null) return;
 
@@ -143,44 +187,63 @@ public class GeneratePayslip extends JFrame {
             }
 
             Date payDate = new Date(selectedDate.getTime());
-
             double base = Double.parseDouble(baseSalaryField.getText().trim());
             double bonus = Double.parseDouble(bonusField.getText().trim());
 
-            // Step 1: Fetch rates from PayrollSettings table
-            PayrollSettings settings = service.getPayrollSettings();
-            double epfRate = settings.getEpfRate();
-            double socsoRate = settings.getSocsoRate();
-            double taxRate = settings.getTaxRate();
-
-            // Step 2: Calculate payroll components
-            double gross = base + bonus;
-            double epf = gross * epfRate;
-            double socso = gross * socsoRate;
-            double tax = gross * taxRate;
-//            double annualIncome = base; // or use (base * 12) depending on your intent
-
-            double annualIncome = gross - epf - socso - tax;
-
-
-            // Step 3: Call updated backend insertPayslip
-            boolean success = service.insertPayslip(username, payDate, base, bonus, epf, socso, tax, annualIncome);
-
-
-            // Step 4: Feedback to user
+            boolean success = service.insertPayslip(username, payDate, base, bonus);
             if (success) {
-                JOptionPane.showMessageDialog(this,
-                    String.format("Payslip generated!\nGross: RM %.2f\nEPF: RM %.2f\nSOCSO: RM %.2f\nTAX: RM %.2f\nNet: RM %.2f",
-                        gross, epf, socso, tax, annualIncome));
+                JOptionPane.showMessageDialog(this, "Payslip generated successfully for " + username);
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to insert payslip.");
             }
 
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Please enter valid numbers for salary and bonus.");
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
     }
+
+        private void insertPayslipForGroup() {
+        String subrole = (String) usernameComboBox.getSelectedItem();
+        java.util.Date selectedDate = (java.util.Date) datePicker.getModel().getValue();
+
+        if (subrole == null || selectedDate == null) {
+            JOptionPane.showMessageDialog(this, "Please select subrole and date.");
+            return;
+        }
+
+        try {
+            double base = Double.parseDouble(baseSalaryField.getText().trim());
+            double bonus = Double.parseDouble(bonusField.getText().trim());
+            Date payDate = new Date(selectedDate.getTime());
+
+            List<String> usernames = service.getUsernamesBySubrole(subrole);
+            ExecutorService executor = Executors.newFixedThreadPool(5); // parallel thread pool
+
+            for (String user : usernames) {
+                executor.submit(() -> {
+                    try {
+                        // Simulate unpredictable execution time
+                        int delay = (int)(Math.random() * 1000); // 0–1000ms
+                        Thread.sleep(delay);
+
+                        service.insertPayslip(user, payDate, base, bonus);
+                        System.out.println("Payslip done for: " + user);
+
+                    } catch (Exception e) {
+                        System.err.println("[" + Thread.currentThread().getName() + "] Error for: " + user + " - " + e.getMessage());
+                    }
+                });
+            }
+
+            executor.shutdown();
+            JOptionPane.showMessageDialog(this, "Concurrent payslip generation started for subrole: " + subrole);
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter valid salary/bonus.");
+        } catch (RemoteException ex) {
+            JOptionPane.showMessageDialog(this, "Remote error: " + ex.getMessage());
+        }
+    }
+
 
 }

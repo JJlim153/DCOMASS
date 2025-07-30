@@ -206,6 +206,12 @@ public class Register extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields.");
                 return;
             }
+            
+            // Check if IC/Passport already exists
+            if (service.icPassportExists(icPassport)) {
+                JOptionPane.showMessageDialog(this, "This IC/Passport is already registered.");
+                return;
+            }
 
             boolean success = service.registerUser(username, password, role, firstName, lastName, icPassport);
             if (success) {
