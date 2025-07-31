@@ -14,7 +14,7 @@ public class PayslipFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new GridLayout(7, 2, 10, 10));
 
-        double netPay = ps.getBaseSalary() + ps.getBonus() - ps.getEpf() - ps.getTax();
+        double netPay = ps.getBaseSalary() + ps.getBonus() - ps.getEpf() ;
 
         add(new JLabel("Username:"));
         add(new JLabel(ps.getUsername()));
@@ -27,9 +27,6 @@ public class PayslipFrame extends JFrame {
 
         add(new JLabel("EPF Deduction:"));
         add(new JLabel("RM " + ps.getEpf()));
-
-        add(new JLabel("Tax Deduction:"));
-        add(new JLabel("RM " + ps.getTax()));
 
         add(new JLabel("Net Pay:"));
         add(new JLabel("RM " + netPay));

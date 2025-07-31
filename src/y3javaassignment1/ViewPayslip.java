@@ -84,7 +84,7 @@ public class ViewPayslip extends JFrame {
                     record.getBonus(),
                     record.getEpf(),
                     record.getSocso(),
-                    record.getAnnualIncome()
+                    record.getNetPay()
                 };
                 model.addRow(row);
             }

@@ -143,7 +143,7 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
                     rs.getDouble("BONUS"),
                     rs.getDouble("EPF"),
                     rs.getDouble("SOCSO"),
-                    rs.getDouble("ANNUALINCOME")
+                    rs.getDouble("NETPAY")
                 ));
             }
         } catch (SQLException e) {
@@ -286,9 +286,8 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
                 double base = rs.getDouble("base_salary");
                 double bonus = rs.getDouble("bonus");
                 double epf = rs.getDouble("epf");
-                double tax = rs.getDouble("tax");
-
-                list.add(new PayrollSummary(username, base, bonus, epf, tax));
+                double socso = rs.getDouble("socso");
+                list.add(new PayrollSummary(username, base, bonus, epf,socso));
             }
 
             return list;
@@ -309,8 +308,8 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
                 double base = rs.getDouble("base_salary");
                 double bonus = rs.getDouble("bonus");
                 double epf = rs.getDouble("epf");
-                double tax = rs.getDouble("tax");
-                return new PayrollSummary(username, base, bonus, epf, tax);
+                double socso = rs.getDouble("socso");
+                return new PayrollSummary(username, base, bonus, epf,socso);
             } else {
                 throw new RemoteException("No payroll record found.");
             }
@@ -358,27 +357,26 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
             throw new RemoteException("Error fetching payroll: " + e.getMessage());
         }
     }
-
-@Override
-public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus,double epf, double socso, double tax, double netpay) throws RemoteException {
-    try (Connection conn = getConnection()) {
-        String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, username);
-        ps.setDate(2, payDate);
-        ps.setDouble(3, base);
-        ps.setDouble(4, bonus);
-        ps.setDouble(5, epf);    // ✅ from frontend
-        ps.setDouble(6, socso);  // ✅ from frontend
-        ps.setDouble(7, tax);    // ✅ from frontend
-        ps.setDouble(8, netpay);
-
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-        throw new RemoteException("Error inserting payslip: " + e.getMessage());
-    }
-}
+    
+// @Override
+//public boolean insertPayslip(String username, java.sql.Date payDate, double base, double bonus,double epf, double socso, double netpay) throws RemoteException {
+//    try (Connection conn = getConnection()) {
+//        String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, NETPAY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+//        PreparedStatement ps = conn.prepareStatement(sql);
+//        ps.setString(1, username);
+//        ps.setDate(2, payDate);
+//        ps.setDouble(3, base);
+//        ps.setDouble(4, bonus);
+//        ps.setDouble(5, epf);    // ✅ from frontend
+//        ps.setDouble(6, socso);  // ✅ from frontend
+//        ps.setDouble(7, netpay);
+//
+//        return ps.executeUpdate() > 0;
+//    } catch (SQLException e) {
+//        e.printStackTrace();
+//        throw new RemoteException("Error inserting payslip: " + e.getMessage());
+//    }
+//}
 
 
 
@@ -401,7 +399,7 @@ public boolean insertPayslip(String username, java.sql.Date payDate, double base
                 rs.getDouble("BONUS"),
                 rs.getDouble("EPF"),
                 rs.getDouble("SOCSO"),
-                rs.getDouble("ANNUALINCOME")
+                rs.getDouble("NETPAY")
             ));
         }
     } catch (SQLException e) {
@@ -414,33 +412,30 @@ public boolean insertPayslip(String username, java.sql.Date payDate, double base
     public PayrollSettings getPayrollSettings() throws RemoteException {
         try (Connection conn = getConnection()) {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT EPF_RATE, SOCSO_RATE, TAX_RATE FROM PAYROLLSETTINGS FETCH FIRST ROW ONLY");
+            ResultSet rs = stmt.executeQuery("SELECT EPF_RATE, SOCSO_RATE FROM PAYROLLSETTINGS FETCH FIRST ROW ONLY");
             if (rs.next()) {
                 return new PayrollSettings(
                     rs.getDouble("EPF_RATE"),
-                    rs.getDouble("SOCSO_RATE"),
-                    rs.getDouble("TAX_RATE")
+                    rs.getDouble("SOCSO_RATE")
                 );
             } else {
                 // Default fallback if no config found
-                return new PayrollSettings(0.11, 0.005, 0.05);
+                return new PayrollSettings(0.11, 0.005);
             }
         } catch (SQLException e) {
             throw new RemoteException("Error fetching settings: " + e.getMessage());
         }
     }
     
-    @Override
-    public boolean updatePayrollSettings(double epfRate, double socsoRate, double taxRate) throws RemoteException {
+    public boolean updatePayrollSettings(double epfRate, double socsoRate) throws RemoteException {
         try (Connection conn = getConnection()) {
             // Simple logic: truncate and insert new
             Statement stmt = conn.createStatement();
             stmt.executeUpdate("DELETE FROM PAYROLLSETTINGS");
 
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO PAYROLLSETTINGS (EPF_RATE, SOCSO_RATE, TAX_RATE) VALUES (?, ?, ?)");
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO PAYROLLSETTINGS (EPF_RATE, SOCSO_RATE) VALUES (?, ?)");
             ps.setDouble(1, epfRate);
             ps.setDouble(2, socsoRate);
-            ps.setDouble(3, taxRate);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RemoteException("Error updating settings: " + e.getMessage());
@@ -497,17 +492,17 @@ public boolean insertPayslip(String username, java.sql.Date payDate, double base
         return usernames;
     }
     
-    @Override
+     @Override
     public boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException {
         try (Connection conn = getConnection()) {
             PayrollSettings settings = getPayrollSettings();
 
             double epf = (base+bonus) * settings.getEpfRate();
             double socso = (base+bonus) * settings.getSocsoRate();
-            double tax = (base+bonus) * settings.getTaxRate();
-            double annualIncome = (base + bonus) - epf - socso;
 
-            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            double netPay = (base + bonus) - epf - socso;
+
+            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO,NETPAY) VALUES (?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, username);
             ps.setDate(2, payDate);
@@ -515,8 +510,7 @@ public boolean insertPayslip(String username, java.sql.Date payDate, double base
             ps.setDouble(4, bonus);
             ps.setDouble(5, epf);
             ps.setDouble(6, socso);
-            ps.setDouble(7, tax);
-            ps.setDouble(8, annualIncome);
+            ps.setDouble(7, netPay);
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {

@@ -22,16 +22,16 @@ public class PayrollRecord implements Serializable {
     private double bonus;
     private double epf;
     private double socso;
-    private double annualIncome;
+    private double netPay;
 
-    public PayrollRecord(String username, Date payDate, double baseSalary, double bonus, double epf, double socso, double annualIncome) {
+    public PayrollRecord(String username, Date payDate, double baseSalary, double bonus, double epf, double socso, double netPay) {
         this.username = username;
         this.payDate = payDate;
         this.baseSalary = baseSalary;
         this.bonus = bonus;
         this.epf = epf;
         this.socso = socso;
-        this.annualIncome = annualIncome;
+        this.netPay = netPay;
     }
 
     public String getUsername() { return username; }
@@ -40,17 +40,8 @@ public class PayrollRecord implements Serializable {
     public double getBonus() { return bonus; }
     public double getEpf() { return epf; }
     public double getSocso() { return socso; }
-    public double getAnnualIncome() { return annualIncome; }
+    public double getNetPay() { return netPay; }
     
-    private double tax;
-
-    public double getTax() {
-        return tax;
-    }
-
-    public void setTax(double tax) {
-        this.tax = tax;
-    }
 
     
 }

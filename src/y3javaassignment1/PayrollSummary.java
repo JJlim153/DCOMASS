@@ -9,14 +9,14 @@ public class PayrollSummary implements Serializable {
     private double baseSalary;
     private double bonus;
     private double epf;
-    private double tax;
+    private double socso;
 
-    public PayrollSummary(String username, double baseSalary, double bonus, double epf, double tax) {
+    public PayrollSummary(String username, double baseSalary, double bonus, double epf, double socso) {
         this.username = username;
         this.baseSalary = baseSalary;
         this.bonus = bonus;
         this.epf = epf;
-        this.tax = tax;
+        this.socso = socso;
     }
 
     public String getUsername() {
@@ -35,7 +35,7 @@ public class PayrollSummary implements Serializable {
         return epf;
     }
 
-    public double getTax() {
-        return tax;
+    public double getSocso() {
+        return socso;
     }
 }

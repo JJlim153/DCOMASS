@@ -13,7 +13,7 @@ public class PayrollReportTable extends JFrame {
     private JComboBox<String> userFilter, monthFilter, yearFilter, sortFilter, sortOrder, viewMode;
     private JTable table;
     private DefaultTableModel model;
-    private JLabel totalBaseLabel, totalBonusLabel, totalEPFLabel, totalSOCSOLabel, totalTaxLabel, totalNetLabel;
+    private JLabel totalBaseLabel, totalBonusLabel, totalEPFLabel, totalSOCSOLabel, totalNetLabel;
 
     public PayrollReportTable(PayrollService service) {
         this.service = service;
@@ -62,14 +62,12 @@ public class PayrollReportTable extends JFrame {
         totalBonusLabel = new JLabel("Total Bonus: RM 0.00");
         totalEPFLabel = new JLabel("Total EPF: RM 0.00");
         totalSOCSOLabel = new JLabel("Total SOCSO: RM 0.00");
-        totalTaxLabel = new JLabel("Total Tax: RM 0.00");
         totalNetLabel = new JLabel("Total Net: RM 0.00");
 
         summaryPanel.add(totalBaseLabel);
         summaryPanel.add(totalBonusLabel);
         summaryPanel.add(totalEPFLabel);
         summaryPanel.add(totalSOCSOLabel);
-        summaryPanel.add(totalTaxLabel);
         summaryPanel.add(totalNetLabel);
         add(summaryPanel, BorderLayout.SOUTH);
 
@@ -143,7 +141,7 @@ public class PayrollReportTable extends JFrame {
 
             // Detailed View
             model.setRowCount(0);
-            model.setColumnIdentifiers(new String[]{"Username", "Date", "Base", "Bonus", "EPF", "SOCSO", "TAX", "Net"});
+            model.setColumnIdentifiers(new String[]{"Username", "Date", "Base", "Bonus", "EPF", "SOCSO", "Net"});
 
             String sortBy = sortFilter.getSelectedItem().toString();
             boolean ascending = sortOrder.getSelectedItem().equals("Ascending");
@@ -151,7 +149,7 @@ public class PayrollReportTable extends JFrame {
             Comparator<PayrollRecord> comparator = null;
             switch (sortBy) {
                 case "Net Pay":
-                    comparator = Comparator.comparingDouble(pr -> pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso() - pr.getTax());
+                    comparator = Comparator.comparingDouble(pr -> pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso());
                     break;
                 case "Base Salary":
                     comparator = Comparator.comparingDouble(PayrollRecord::getBaseSalary);
@@ -166,10 +164,10 @@ public class PayrollReportTable extends JFrame {
                 filtered.sort(comparator);
             }
 
-            double totalBase = 0, totalBonus = 0, totalEPF = 0, totalSOCSO = 0, totalTax = 0, totalNet = 0;
+            double totalBase = 0, totalBonus = 0, totalEPF = 0, totalSOCSO = 0, totalNet = 0;
 
             for (PayrollRecord pr : filtered) {
-                double net = pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso() - pr.getTax();
+                double net = pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso();
 
                 model.addRow(new Object[]{
                         pr.getUsername(),
@@ -178,7 +176,6 @@ public class PayrollReportTable extends JFrame {
                         pr.getBonus(),
                         pr.getEpf(),
                         pr.getSocso(),
-                        pr.getTax(),
                         String.format("%.2f", net)
                 });
 
@@ -186,7 +183,6 @@ public class PayrollReportTable extends JFrame {
                 totalBonus += pr.getBonus();
                 totalEPF += pr.getEpf();
                 totalSOCSO += pr.getSocso();
-                totalTax += pr.getTax();
                 totalNet += net;
             }
 
@@ -194,7 +190,6 @@ public class PayrollReportTable extends JFrame {
             totalBonusLabel.setText(String.format("Total Bonus: RM %.2f", totalBonus));
             totalEPFLabel.setText(String.format("Total EPF: RM %.2f", totalEPF));
             totalSOCSOLabel.setText(String.format("Total SOCSO: RM %.2f", totalSOCSO));
-            totalTaxLabel.setText(String.format("Total Tax: RM %.2f", totalTax));
             totalNetLabel.setText(String.format("Total Net: RM %.2f", totalNet));
 
         } catch (RemoteException e) {
@@ -204,7 +199,7 @@ public class PayrollReportTable extends JFrame {
 
     private void loadSummaryReport(List<PayrollRecord> records) {
         model.setRowCount(0);
-        model.setColumnIdentifiers(new String[]{"Period", "Total Base", "Total Bonus", "Total EPF", "Total SOCSO", "Total Tax", "Total Net"});
+        model.setColumnIdentifiers(new String[]{"Period", "Total Base", "Total Bonus", "Total EPF", "Total SOCSO", "Total Net"});
 
         Map<String, double[]> totalsMap = new TreeMap<>();
         Calendar cal = Calendar.getInstance();
@@ -221,12 +216,11 @@ public class PayrollReportTable extends JFrame {
             totals[1] += pr.getBonus();
             totals[2] += pr.getEpf();
             totals[3] += pr.getSocso();
-            totals[4] += pr.getTax();
-            totals[5] += pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso() - pr.getTax();
+            totals[4] += pr.getBaseSalary() + pr.getBonus() - pr.getEpf() - pr.getSocso();
             totalsMap.put(key, totals);
         }
 
-        double totalBase = 0, totalBonus = 0, totalEPF = 0, totalSOCSO = 0, totalTax = 0, totalNet = 0;
+        double totalBase = 0, totalBonus = 0, totalEPF = 0, totalSOCSO = 0, totalNet = 0;
 
         for (Map.Entry<String, double[]> entry : totalsMap.entrySet()) {
             double[] vals = entry.getValue();
@@ -236,23 +230,20 @@ public class PayrollReportTable extends JFrame {
                     String.format("RM %.2f", vals[1]),
                     String.format("RM %.2f", vals[2]),
                     String.format("RM %.2f", vals[3]),
-                    String.format("RM %.2f", vals[4]),
-                    String.format("RM %.2f", vals[5])
+                    String.format("RM %.2f", vals[4])
             });
 
             totalBase += vals[0];
             totalBonus += vals[1];
             totalEPF += vals[2];
             totalSOCSO += vals[3];
-            totalTax += vals[4];
-            totalNet += vals[5];
+            totalNet += vals[4];
         }
 
         totalBaseLabel.setText(String.format("Total Base: RM %.2f", totalBase));
         totalBonusLabel.setText(String.format("Total Bonus: RM %.2f", totalBonus));
         totalEPFLabel.setText(String.format("Total EPF: RM %.2f", totalEPF));
         totalSOCSOLabel.setText(String.format("Total SOCSO: RM %.2f", totalSOCSO));
-        totalTaxLabel.setText(String.format("Total Tax: RM %.2f", totalTax));
         totalNetLabel.setText(String.format("Total Net: RM %.2f", totalNet));
     }
 }
