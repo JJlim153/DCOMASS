@@ -502,10 +502,10 @@ public boolean insertPayslip(String username, java.sql.Date payDate, double base
         try (Connection conn = getConnection()) {
             PayrollSettings settings = getPayrollSettings();
 
-            double epf = base * settings.getEpfRate();
-            double socso = base * settings.getSocsoRate();
-            double tax = base * settings.getTaxRate();
-            double annualIncome = (base + bonus) - epf - socso - tax;
+            double epf = (base+bonus) * settings.getEpfRate();
+            double socso = (base+bonus) * settings.getSocsoRate();
+            double tax = (base+bonus) * settings.getTaxRate();
+            double annualIncome = (base + bonus) - epf - socso;
 
             String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, TAX, ANNUALINCOME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);

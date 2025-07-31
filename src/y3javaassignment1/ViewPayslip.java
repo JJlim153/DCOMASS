@@ -73,7 +73,7 @@ public class ViewPayslip extends JFrame {
                 records = service.getPayslipsForUser(loggedInUsername); // Only user's own
             }
 
-            String[] columns = {"Username", "Date", "Base Salary", "Bonus", "EPF", "SOCSO", "Annual Income"};
+            String[] columns = {"Username", "Date", "Base Salary", "Bonus", "EPF", "SOCSO", "Net Pay"};
             DefaultTableModel model = new DefaultTableModel(columns, 0);
 
             for (PayrollRecord record : records) {
