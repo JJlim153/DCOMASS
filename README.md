@@ -1,8 +1,5 @@
 Remove if completed
 
-- first user forced to admin role
-- change admin dashboard view profile button to HR one
-- View payslip change annual to net pay
 - code cleaning
 
 
