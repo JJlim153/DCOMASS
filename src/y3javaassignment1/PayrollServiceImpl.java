@@ -233,32 +233,77 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
 
 
 
-    @Override
-    public boolean updateUserProfile(String username, String password, String firstName, String lastName, String icPassport) throws RemoteException {
-        try (Connection conn = getConnection()) {
-            conn.setAutoCommit(false);
+@Override
+public boolean updateUserProfile(String username,
+                                 String password,
+                                 String firstName,
+                                 String lastName,
+                                 String icPassport) throws RemoteException {
+    Connection conn = null;
+    try {
+        conn = getConnection();
+        conn.setAutoCommit(false);
 
-            if (password != null && !password.trim().isEmpty()) {
-                PreparedStatement ps = conn.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?");
-                ps.setString(1, password);
+        // Normalize inputs
+        String newIc = (icPassport == null) ? null : icPassport.trim();
+        String newPwd = (password == null) ? null : password.trim();
+
+        // 1) Check duplicate IC/Passport (ignore the current user)
+        if (newIc != null && !newIc.isEmpty()) {
+            try (PreparedStatement checkPs = conn.prepareStatement(
+                    "SELECT 1 FROM USERS WHERE IC_PASSPORT = ? AND USERNAME <> ?")) {
+                checkPs.setString(1, newIc);
+                checkPs.setString(2, username);
+                try (ResultSet rs = checkPs.executeQuery()) {
+                    if (rs.next()) {
+                        conn.rollback();
+                        throw new RemoteException("IC/Passport already exists for another user.");
+                    }
+                }
+            }
+        }
+
+        // 2) Update password if provided
+        if (newPwd != null && !newPwd.isEmpty()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE USERS SET PASSWORD = ? WHERE USERNAME = ?")) {
+                ps.setString(1, newPwd);
                 ps.setString(2, username);
                 ps.executeUpdate();
             }
+        }
 
-            PreparedStatement ps2 = conn.prepareStatement("UPDATE USERS SET FIRSTNAME = ?, LASTNAME = ?, IC_PASSPORT = ? WHERE USERNAME = ?");
+        // 3) Update profile fields (first/last name + IC/Passport)
+        try (PreparedStatement ps2 = conn.prepareStatement(
+                "UPDATE USERS SET FIRSTNAME = ?, LASTNAME = ?, IC_PASSPORT = ? WHERE USERNAME = ?")) {
             ps2.setString(1, firstName);
             ps2.setString(2, lastName);
-            ps2.setString(3, icPassport);
+            ps2.setString(3, newIc);
             ps2.setString(4, username);
             ps2.executeUpdate();
+        }
 
-            conn.commit();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RemoteException("Error updating profile: " + e.getMessage());
+        // 4) Commit
+        conn.commit();
+        return true;
+
+    } catch (SQLException e) {
+        // Roll back on any SQL error
+        if (conn != null) {
+            try { conn.rollback(); } catch (SQLException ignored) {}
+        }
+        throw new RemoteException("Error updating profile: " + e.getMessage(), e);
+    } finally {
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true);
+                conn.close();
+            } catch (SQLException ignored) {}
         }
     }
+}
+
+
 
     
     
@@ -479,31 +524,60 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
     @Override
     public List<String> getUsernamesBySubrole(String subrole) throws RemoteException {
         List<String> usernames = new ArrayList<>();
-        try (Connection conn = getConnection()) {
-            PreparedStatement ps = conn.prepareStatement("SELECT USERNAME FROM EMPLOYEESUBROLES WHERE SUBROLE = ?");
+        String sql =
+            "SELECT es.USERNAME " +
+            "FROM EMPLOYEESUBROLES es " +
+            "JOIN USERS u ON u.USERNAME = es.USERNAME " +
+            "WHERE es.SUBROLE = ? " +
+            "  AND UPPER(u.STATUS) = 'APPROVED'";   // only approved users
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, subrole);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                usernames.add(rs.getString("USERNAME"));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    usernames.add(rs.getString("USERNAME"));
+                }
             }
         } catch (SQLException e) {
-            throw new RemoteException("Error fetching usernames by subrole: " + e.getMessage());
+            throw new RemoteException("Error fetching usernames by subrole: " + e.getMessage(), e);
         }
         return usernames;
     }
+
     
-     @Override
-    public boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException {
-        try (Connection conn = getConnection()) {
-            PayrollSettings settings = getPayrollSettings();
+@Override
+public boolean insertPayslip(String username, Date payDate, double base, double bonus) throws RemoteException {
+    try (Connection conn = getConnection()) {
 
-            double epf = (base+bonus) * settings.getEpfRate();
-            double socso = (base+bonus) * settings.getSocsoRate();
+        // --- 1) Enforce one payslip per user per month ---
+        Date startOfMonth = startOfMonth(payDate);
+        Date startOfNextMonth = startOfNextMonth(payDate);
 
-            double netPay = (base + bonus) - epf - socso;
+        String dupSql = "SELECT 1 FROM PAYROLL " +
+                        "WHERE USERNAME = ? AND PAY_DATE >= ? AND PAY_DATE < ? FETCH FIRST ROW ONLY";
+        try (PreparedStatement dup = conn.prepareStatement(dupSql)) {
+            dup.setString(1, username);
+            dup.setDate(2, startOfMonth);
+            dup.setDate(3, startOfNextMonth);
+            try (ResultSet rs = dup.executeQuery()) {
+                if (rs.next()) {
+                    throw new RemoteException("Payslip for this user already exists for the selected month.");
+                }
+            }
+        }
 
-            String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO,NETPAY) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(sql);
+        // --- 2) Compute contributions ---
+        PayrollSettings settings = getPayrollSettings();
+        double total = base + bonus;
+        double epf   = total * settings.getEpfRate();
+        double socso = total * settings.getSocsoRate();
+        double netPay = total - epf - socso;
+
+        // --- 3) Insert ---
+        String sql = "INSERT INTO PAYROLL (USERNAME, PAY_DATE, BASE_SALARY, BONUS, EPF, SOCSO, NETPAY) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setDate(2, payDate);
             ps.setDouble(3, base);
@@ -511,13 +585,39 @@ public class PayrollServiceImpl extends UnicastRemoteObject implements PayrollSe
             ps.setDouble(5, epf);
             ps.setDouble(6, socso);
             ps.setDouble(7, netPay);
-
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RemoteException("Error inserting payslip (group): " + e.getMessage());
         }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw new RemoteException("Error inserting payslip: " + e.getMessage(), e);
     }
+}
+
+/** Helpers to get month boundaries (works on Java 8) */
+private static Date startOfMonth(Date anyDay) {
+    java.util.Calendar cal = java.util.Calendar.getInstance();
+    cal.setTime(anyDay);
+    cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+    cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+    cal.set(java.util.Calendar.MINUTE, 0);
+    cal.set(java.util.Calendar.SECOND, 0);
+    cal.set(java.util.Calendar.MILLISECOND, 0);
+    return new Date(cal.getTimeInMillis());
+}
+
+private static Date startOfNextMonth(Date anyDay) {
+    java.util.Calendar cal = java.util.Calendar.getInstance();
+    cal.setTime(anyDay);
+    cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+    cal.add(java.util.Calendar.MONTH, 1);
+    cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+    cal.set(java.util.Calendar.MINUTE, 0);
+    cal.set(java.util.Calendar.SECOND, 0);
+    cal.set(java.util.Calendar.MILLISECOND, 0);
+    return new Date(cal.getTimeInMillis());
+}
+
     
     @Override
     public String getSubroleForUser(String username) throws RemoteException {

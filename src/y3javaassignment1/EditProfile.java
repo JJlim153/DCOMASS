@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -196,7 +197,7 @@ public class EditProfile extends javax.swing.JFrame {
 
     private void SaveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveBtnActionPerformed
         // TODO add your handling code here:
-        try {
+            try {
             boolean updated = service.updateUserProfile(
                 loggedInUsername,
                 PasswordTxt.getText(),
@@ -205,14 +206,21 @@ public class EditProfile extends javax.swing.JFrame {
                 ICPasswordTxt.getText()
             );
             if (updated) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Profile updated successfully!");
+                JOptionPane.showMessageDialog(this, "Profile updated successfully!");
                 loadProfile();
-            } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Update failed.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Error updating profile: " + e.getMessage());
+            // Get root cause message only
+            Throwable cause = e;
+            while (cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+            String message = (cause.getMessage() != null) ? cause.getMessage() : "Unexpected error.";
+
+            JOptionPane.showMessageDialog(this,
+                    "Update failed: " + message,
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_SaveBtnActionPerformed
 
