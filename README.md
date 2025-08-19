@@ -1,10 +1,10 @@
 Remove if completed
--edit profile for ic can duplicate
--**hardcode insert 3 fix subrole so admin cant insert for the employee
--generate payslip also will generate for employee that the status is rejected or pending
--generate payslip also will generate for user that have for that month already
--**payroll report need to have the yearly calculate(by adding the montly total net)
-- code cleaning
+done-edit profile for ic can duplicate
+done-**hardcode insert 3 fix subrole so admin cant insert for the employee
+done-generate payslip also will generate for employee that the status is rejected or pending
+done-generate payslip also will generate for user that have for that month already
+done-**payroll report need to have the yearly calculate(by adding the montly total net)
+done- code cleaning
 
 
 LIBRARY IMPORT
