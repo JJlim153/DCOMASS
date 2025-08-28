@@ -226,14 +226,18 @@ public class EditProfile extends javax.swing.JFrame {
 
     private void BackBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BackBtnActionPerformed
         // TODO add your handling code here:
-        System.out.println("what is the" + loggedInRole);
         if (loggedInRole.equals("Employee")) {
-            System.out.println("HomePage" + loggedInRole);
-            new EmployeeDashboard(loggedInUsername,service,loggedInRole).setVisible(true);
+            EmployeeDashboard emp = new EmployeeDashboard(loggedInUsername, service, loggedInRole);
+            emp.setLocationRelativeTo(null); 
+            emp.setVisible(true);
         } else if (loggedInRole.equals("HR")) {
-            new HRDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
+            HRDashboard hr = new HRDashboard(loggedInUsername, service, loggedInRole);
+            hr.setLocationRelativeTo(null);  
+            hr.setVisible(true);
         } else if (loggedInRole.equals("Admin")) {
-            new AdminDashboard(loggedInUsername,service,loggedInRole).setVisible(true);
+            AdminDashboard admin = new AdminDashboard(loggedInUsername, service, loggedInRole);
+            admin.setLocationRelativeTo(null); 
+            admin.setVisible(true);
         }
         this.dispose();
     }//GEN-LAST:event_BackBtnActionPerformed

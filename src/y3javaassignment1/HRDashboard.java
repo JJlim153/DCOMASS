@@ -37,7 +37,11 @@ public class HRDashboard extends javax.swing.JFrame {
         this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
-        System.out.println("Hi " + username);
+//        System.out.println("Hi " + username);
+        WelcomeText.setText("Welcome, " + loggedInUsername + "!");
+        WelcomeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WelcomeText.setPreferredSize(new java.awt.Dimension(300, 30));  // Ensure it has width
+        WelcomeText.setForeground(java.awt.Color.BLACK); // In case font color is invisible
     }
 
     /**
@@ -56,6 +60,7 @@ public class HRDashboard extends javax.swing.JFrame {
         PayrollReportBtn = new javax.swing.JButton();
         GeneratePayslipBtn = new javax.swing.JButton();
         ViewPayslipBtn = new javax.swing.JButton();
+        WelcomeText = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -104,14 +109,18 @@ public class HRDashboard extends javax.swing.JFrame {
             }
         });
 
+        WelcomeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WelcomeText.setText("Welcome, [username]!");
+        WelcomeText.setPreferredSize(new java.awt.Dimension(300, 25));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(97, 97, 97)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(46, 46, 46)
                 .addComponent(LogoutBtn))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -128,6 +137,7 @@ public class HRDashboard extends javax.swing.JFrame {
                         .addGap(42, 42, 42)
                         .addComponent(ViewPayslipBtn)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(WelcomeText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -137,7 +147,9 @@ public class HRDashboard extends javax.swing.JFrame {
                         .addContainerGap()
                         .addComponent(jLabel1))
                     .addComponent(LogoutBtn))
-                .addGap(101, 101, 101)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(WelcomeText, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(68, 68, 68)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(UserStatusBtn)
                     .addComponent(EditProfileBtn)
@@ -235,6 +247,7 @@ public class HRDashboard extends javax.swing.JFrame {
     private javax.swing.JButton PayrollReportBtn;
     private javax.swing.JButton UserStatusBtn;
     private javax.swing.JButton ViewPayslipBtn;
+    private javax.swing.JLabel WelcomeText;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

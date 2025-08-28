@@ -40,7 +40,7 @@ public interface PayrollService extends Remote {
 
     // Payroll Functions
     List<PayrollSummary> generatePayrollReport() throws RemoteException;
-    PayrollSummary getPayslip(String username) throws RemoteException;
+//    PayrollSummary getPayslip(String username) throws RemoteException;
     
     PayrollSettings getPayrollSettings() throws RemoteException;
     boolean updatePayrollSettings(double epfRate, double socsoRate) throws RemoteException;

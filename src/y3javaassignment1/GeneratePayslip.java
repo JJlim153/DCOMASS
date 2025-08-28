@@ -119,8 +119,11 @@ public class GeneratePayslip extends JFrame {
 
         backButton.addActionListener(e -> {
             dispose();
-            new HRDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
+            HRDashboard hr = new HRDashboard(loggedInUsername, service, loggedInRole);
+            hr.setLocationRelativeTo(null);   // ✅ center on screen
+            hr.setVisible(true);
         });
+
 
         // Load default options
         individualRadio.addActionListener(e -> loadUsernames());

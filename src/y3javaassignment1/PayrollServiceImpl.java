@@ -342,27 +342,27 @@ public boolean updateUserProfile(String username,
         }
     }
 
-    @Override
-    public PayrollSummary getPayslip(String username) throws RemoteException {
-        try (Connection conn = getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM payroll WHERE username = ?");
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                double base = rs.getDouble("base_salary");
-                double bonus = rs.getDouble("bonus");
-                double epf = rs.getDouble("epf");
-                double socso = rs.getDouble("socso");
-                return new PayrollSummary(username, base, bonus, epf,socso);
-            } else {
-                throw new RemoteException("No payroll record found.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RemoteException("Database error: " + e.getMessage());
-        }
-    }
+//    @Override
+//    public PayrollSummary getPayslip(String username) throws RemoteException {
+//        try (Connection conn = getConnection()) {
+//            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM payroll WHERE username = ?");
+//            stmt.setString(1, username);
+//            ResultSet rs = stmt.executeQuery();
+//
+//            if (rs.next()) {
+//                double base = rs.getDouble("base_salary");
+//                double bonus = rs.getDouble("bonus");
+//                double epf = rs.getDouble("epf");
+//                double socso = rs.getDouble("socso");
+//                return new PayrollSummary(username, base, bonus, epf,socso);
+//            } else {
+//                throw new RemoteException("No payroll record found.");
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            throw new RemoteException("Database error: " + e.getMessage());
+//        }
+//    }
     
     @Override
     public List<String> getApprovedUsernames() throws RemoteException {

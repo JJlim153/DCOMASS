@@ -30,7 +30,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
-        System.out.println("Hi " + username);
+//        System.out.println("Hi " + username);
         // You could also display the username:
         // jLabelWelcome.setText("Welcome, " + username);
         // Set dynamic welcome text

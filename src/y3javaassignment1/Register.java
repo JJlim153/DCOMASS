@@ -22,7 +22,7 @@ public class Register extends javax.swing.JFrame {
     public Register() {
         initComponents();
         try {
-        service = (PayrollService) Naming.lookup("rmi://localhost/PayrollService");
+        service = (PayrollService) Naming.lookup("rmi://localhost:1099/PayrollService");
     } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
         e.printStackTrace();

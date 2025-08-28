@@ -39,22 +39,29 @@ public class ViewPayslip extends JFrame {
         // Back button
         JButton backButton = new JButton("Back");
         
-        backButton.addActionListener(e -> {
-            dispose();
-            switch (loggedInRole) {
-                case "Admin":
-                    new AdminDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
-                    break;
-                case "HR":
-                    new HRDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
-                    break;
-                case "Employee":
-                    new EmployeeDashboard(loggedInUsername, service, loggedInRole).setVisible(true);
-                    break;
-                default:
-                    JOptionPane.showMessageDialog(this, "Unknown role. Cannot return to dashboard.");
-            }
-        });
+       backButton.addActionListener(e -> {
+        dispose();
+        switch (loggedInRole) {
+            case "Admin":
+                AdminDashboard admin = new AdminDashboard(loggedInUsername, service, loggedInRole);
+                admin.setLocationRelativeTo(null);  
+                admin.setVisible(true);
+                break;
+            case "HR":
+                HRDashboard hr = new HRDashboard(loggedInUsername, service, loggedInRole);
+                hr.setLocationRelativeTo(null);     
+                hr.setVisible(true);
+                break;
+            case "Employee":
+                EmployeeDashboard emp = new EmployeeDashboard(loggedInUsername, service, loggedInRole);
+                emp.setLocationRelativeTo(null);     
+                emp.setVisible(true);
+                break;
+            default:
+                JOptionPane.showMessageDialog(this, "Unknown role. Cannot return to dashboard.");
+        }
+    });
+
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.add(backButton);

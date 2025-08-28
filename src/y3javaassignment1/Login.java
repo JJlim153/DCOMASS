@@ -23,7 +23,7 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         initComponents();
         try {
-        service = (PayrollService) Naming.lookup("rmi://localhost/PayrollService");
+        service = (PayrollService) Naming.lookup("rmi://localhost:1099/PayrollService");
     } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
         e.printStackTrace();
@@ -88,26 +88,29 @@ public class Login extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(71, 71, 71)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(UserNameTextField))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(PasswordTextField)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(LoginBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(26, 26, 26)
+                                .addComponent(LoginBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap(78, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(RegisterBtn))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(RegisterBtn)
-                .addContainerGap())
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 251, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(61, 61, 61))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -117,16 +120,18 @@ public class Login extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(UserNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(21, 21, 21)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(29, 29, 29)
+                    .addComponent(UserNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
                 .addComponent(LoginBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
-                .addComponent(RegisterBtn)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+                .addComponent(RegisterBtn))
         );
 
         pack();
@@ -166,15 +171,22 @@ public class Login extends javax.swing.JFrame {
                     } else if (status.equalsIgnoreCase("Approved")) {
                         JOptionPane.showMessageDialog(this, "Login successful! Role: " + role);
                         if (role.equalsIgnoreCase("Employee")) {
-                            new EmployeeDashboard(username, service, role).setVisible(true);
+//                            new EmployeeDashboard(username, service, role).setVisible(true);
+                            EmployeeDashboard employeeForm = new EmployeeDashboard(username, service, role);
+//                            employeeForm.setWelcomeMessage(username); // <-- Set the label text after it's initialized
+                            employeeForm.setLocationRelativeTo(null);
+                            employeeForm.setVisible(true);
                         } else if (role.equalsIgnoreCase("HR")) {
-                            new HRDashboard(username, service, role).setVisible(true);
+//                            new HRDashboard(username, service, role).setVisible(true);
+                            HRDashboard hrForm = new HRDashboard(username, service, role);
+//                            hrForm.setWelcomeMessage(username); // <-- Set the label text after it's initialized
+                            hrForm.setLocationRelativeTo(null);
+                            hrForm.setVisible(true);
                         } else if (role.equalsIgnoreCase("Admin")) {
                             AdminDashboard adminForm = new AdminDashboard(username, service, role);
-                            adminForm.setWelcomeMessage(username); // <-- Set the label text after it's initialized
+//                            adminForm.setWelcomeMessage(username); // <-- Set the label text after it's initialized
                             adminForm.setLocationRelativeTo(null);
                             adminForm.setVisible(true);
-
                         }
                         this.dispose();
                     } else {

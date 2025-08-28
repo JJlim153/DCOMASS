@@ -26,9 +26,13 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         this.service = service;
         this.loggedInUsername = username;
         this.loggedInRole = role;
-        System.out.println("Hi" + username);
+//        System.out.println("Hi" + username);
         // You could also display the username:
         // jLabelWelcome.setText("Welcome, " + username);
+        WelcomeText.setText("Welcome, " + loggedInUsername + "!");
+        WelcomeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WelcomeText.setPreferredSize(new java.awt.Dimension(300, 30));  // Ensure it has width
+        WelcomeText.setForeground(java.awt.Color.BLACK); // In case font color is invisible
     }
 
     
@@ -45,6 +49,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         ProfileBtn = new javax.swing.JButton();
         LogoutBtn = new javax.swing.JButton();
         ViewPayslipBtn = new javax.swing.JButton();
+        WelcomeText = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -72,32 +77,41 @@ public class EmployeeDashboard extends javax.swing.JFrame {
             }
         });
 
+        WelcomeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        WelcomeText.setText("Welcome, [username]!");
+        WelcomeText.setPreferredSize(new java.awt.Dimension(300, 25));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(WelcomeText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(63, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(LogoutBtn)
-                .addGap(2, 2, 2))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(ProfileBtn)
-                .addGap(30, 30, 30)
-                .addComponent(ViewPayslipBtn)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(LogoutBtn)
+                        .addGap(2, 2, 2))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(ProfileBtn)
+                        .addGap(76, 76, 76)
+                        .addComponent(ViewPayslipBtn)
+                        .addGap(66, 66, 66))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(LogoutBtn))
-                .addGap(101, 101, 101)
+                        .addComponent(LogoutBtn)
+                        .addGap(42, 42, 42))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                .addComponent(WelcomeText, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(56, 56, 56)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ProfileBtn)
                     .addComponent(ViewPayslipBtn))
@@ -168,6 +182,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     private javax.swing.JButton LogoutBtn;
     private javax.swing.JButton ProfileBtn;
     private javax.swing.JButton ViewPayslipBtn;
+    private javax.swing.JLabel WelcomeText;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 
